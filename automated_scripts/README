@@ -1,0 +1,17 @@
+Automated Scripts
+
+1. Mandatorily link Things
+ 
+Anytime a Thing contains 'https://twitter.com/' that Thing is definitionally
+connected to the Thing called Twitter. 
+
+mandatory-connect-urls-to-things.php is the entry point for defining what
+gets connected to which.
+template-url-connects-to-thing.php is a helper for the same.
+
+2. Suggestions for research
+
+Any Thing that is a developer may also have a public repo. 
+
+developers_tend_to_have_repos.php discovers developers who do not as a 
+suggested avenue for research.
