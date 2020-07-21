@@ -34,9 +34,10 @@ $dialog_question->sizes_change(MENU_SZ_SHORT);
 $dialog_question->input = 'Search on what name?';
 $search_phrase = $dialog_question->show();
 
-if ($search_phrase === "") {
+if ($search_phrase === '') {
   // cancelled
   $thing_tag = $effort->wereLookingAt();
+  $effort->whatToShowNext($thing_tag);
 
 } else {
   // search on that phrase
@@ -111,8 +112,9 @@ if ($search_phrase === "") {
   $dialog_found->sizes_change(MENU_SZ_LONG);
   $output = $dialog_found->show();
 
-  if ($output === "") {
+  if ($output === '') {
     $thing_tag = $effort->wereLookingAt();
+    $effort->whatToShowNext($thing_tag);
 
   } else {
     // what got chosen?
