@@ -14,11 +14,14 @@
 require_once('classes/effort02_class.php');
 
 $effort = new effort02;
-$cribs = array('Twitter' => 'https://twitter.com/',
-	       'Swan Bitcoin' => 'https://www.swanbitcoin.com/',
-	       'Reddit' => 'https://www.reddit.com/',
-	       'AboutMe' => 'https://about.me/',
-	       'Github' => 'https://github.com/'
+$cribs = array('https://twitter.com/' => 'Twitter',
+	       'https://www.swanbitcoin.com/' => 'Swan Bitcoin',
+	       'https://www.reddit.com/' => 'Reddit',
+	       'https://about.me/' => 'AboutMe',
+	       'https://www.youtube.com/' => 'Youtube',
+	       'https://youtu.be/' => 'Youtube',
+	       'https://keybase.io/' => 'Keybase',
+	       'https://github.com/' => 'Github'
 	       );
 
 if ($argc === 2) {
@@ -36,7 +39,7 @@ if ($argc === 2) {
   $effort->err(__FILE__, "expected one or two arguments");
 }
 
-foreach($cribs as $thing => $url) {
+foreach($cribs as $url => $thing) {
   $output = shell_exec('php automated_scripts/template-url-connects-to-thing.php "' . $projname . '" ' . $tag_arg .  ' "' . $thing . '" "' . $url . '"');
 }
 
