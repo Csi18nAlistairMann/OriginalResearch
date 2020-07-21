@@ -153,10 +153,11 @@ class things
   }
 
   function getNewTag($text) {
-    if (strpos($text, 'https://') === 0) {
-      $s = substr($text, 8, 3);
+    $s = str_replace(' ', '', $text);
+    if (strpos($s, 'https://') === 0) {
+      $s = substr($s, 8, 3);
     } else {
-      $s = substr($text, 0, 3);
+      $s = substr($s, 0, 3);
     }
     $s .= dechex(sizeof($this->db) + 1);
     return $s;
