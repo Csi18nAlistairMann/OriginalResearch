@@ -4,11 +4,19 @@ require_once('classes/akas_class.php');
 
 class thing
 {
+  private $nuance = null;
   private $tag = null;
   private $text = null;
   private $timestamp = null;
   private $type = null;
   private $user = null;
+
+  function nuance($val = null) {
+    if ($val === null)
+      return $this->nuance;
+    else
+      $this->nuance = $val;
+  }
 
   function tag($val = null) {
     if ($val === null)
@@ -22,6 +30,15 @@ class thing
       return $this->text;
     else
       $this->text = $val;
+  }
+
+  function getTextAndNuance() {
+    $txt = $this->text();
+    $nua = $this->nuance();
+    if ($nua === null)
+      return $txt;
+    else
+      return $txt . ' (NB:' . $nua . ')' ;
   }
 
   function timestamp($val = null) {
@@ -45,19 +62,11 @@ class thing
       $this->user = $val;
   }
 
-  function populate($record) {
-    $this->tag($record[1][0]);
-    $this->text($record[1][3]);
-    $this->timestamp($record[1][1]);
-    $this->type($record[0]);
-    $this->user($record[1][2]);
-  }
-
   /*
-    the nature of the AKA is that Del is identical to Derek. This is
-    accomplished here by see if a phrase being searched for matches
-    this item's text, or any item's text where that second item is
-    connected to this one in akas.serialised.
+    The nature of the AKA is that 'Del' is identical to 'Derek'. This is
+    accomplished here by seeing if a phrase being searched for matches this
+    item's text, or any item's text where that second item is connected to this
+    one in akas.serialised.
    */
   function textIs($projname, $phrase) {
     $rv = array();
@@ -108,9 +117,10 @@ class things
 
   function load() {
     if (!file_exists($this->db_file)) {
-      // If the database doesn't exist we nevertheless want to have
-      // a top level that can be used. Make it, and save it
+      // If the database doesn't exist we nevertheless want to have a top level
+      // that can be used. Make it, and save it
       $t = new thing;
+      $t->nuance('');
       $t->tag('?');
       $t->text('Top Level');
       $t->timestamp(date(TIMESTAMP_FORMAT));
@@ -152,9 +162,14 @@ class things
     return null;
   }
 
+  // tag is first three non-whitespace chars of name if available, and number
+  // of items already in db.
+  // Also exclude website prefixes
   function getNewTag($text) {
     $s = str_replace(' ', '', $text);
-    if (strpos($s, 'https://') === 0) {
+    if (strpos($s, 'https://www.') === 0) {
+      $s = substr($s, 12, 3);
+    } elseif (strpos($s, 'https://') === 0) {
       $s = substr($s, 8, 3);
     } else {
       $s = substr($s, 0, 3);

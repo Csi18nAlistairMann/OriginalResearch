@@ -28,7 +28,8 @@ $effort = new effort02;
 // What tag will we show? 0 for 'first available'
 $rv = 0;
 if ($argc !== 5) {
-  $effort->err(__FILE__, "Bad arguments. \"projname\" [ALL|<newline delimited file>] <Thing name> <URL root>\n");
+  $effort->err(__FILE__, "Bad arguments. \"projname\" [ALL|<newline " .
+	       "delimited file>] <Thing name> <URL root>\n");
   $rv = 1;
 }
 
@@ -67,8 +68,17 @@ if ($rv === 0) {
   $links->load();
   $thingtag = $things->getTagFor($tagname);
   if ($thingtag === false) {
-    $effort->err(__FILE__, 'Cant find tag for ' . $tagname);
-    exit;
+    // Can't find the tag? This is a new database so add it in
+    $thing_type = TYPE_TEST_THING;
+    $thing_ts = date(TIMESTAMP_FORMAT);
+    $thing_uploader = STANDARD_USER;
+    $thing_name = $tagname;
+    $thing_nuance = '';
+    $thing_tag = $things->getNewTag($thing_name);
+    shell_exec("php api/thing_add.php \"$projname\" \"$thing_type\" " .
+	       "\"$thing_tag\" \"$thing_ts\" \"$thing_uploader\" " .
+	       "\"$thing_name\" \"$thing_nuance\"");
+    $thingtag = $thing_tag;
   }
 
   $changes = 0;
@@ -83,7 +93,8 @@ if ($rv === 0) {
 
     } else {
       $tag_last_checked = $automated_cribs->getTagLastChecked($tag);
-      if ($tag_last_checked === null || $tag_last_checked <= $thing->timestamp()) {;
+      if ($tag_last_checked === null ||
+	  $tag_last_checked <= $thing->timestamp()) {;
 	$automated_cribs->setTagLastChecked($tag, $thing->timestamp());
 	if (strpos($thing->text(), $urlroot) !== false) {
 	  if ($links->linkTags($tag, $thingtag) == 0)

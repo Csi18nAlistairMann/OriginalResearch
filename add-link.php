@@ -50,7 +50,7 @@ foreach($things->db as $item) {
   }
 }
 
-// Construct a dialog menu of matches  
+// Construct a dialog menu of matches
 $n = 1;
 $output_choices = '';
 $crib = array();
@@ -62,7 +62,8 @@ $crib[] = array($n, $search_phrase, 0, $ASNEW);
 $n++;
 if (sizeof($exact_arr)) {
   foreach($exact_arr as $item) {
-    $dialog_found->choice_add($n, $item->text() . ' (' . $item->tag() . ') already present');
+    $dialog_found->choice_add($n, $item->text() . ' (' . $item->tag() .
+			      ') already present');
     $crib[] = array($n, $item->text(), $item->tag(), $ALREADYPRESENT);
     $n++;
   }
@@ -70,7 +71,8 @@ if (sizeof($exact_arr)) {
 
 if (sizeof($found_arr)) {
   foreach($found_arr as $item) {
-    $dialog_found->choice_add($n, $item->text() . ' (' . $item->tag() . ') link to old');
+    $dialog_found->choice_add($n, $item->text() . ' (' . $item->tag() .
+			      ') link to old');
     $crib[] = array($n, $item->text(), $item->tag(), $LINKTOOLD);
     $n++;
   }
@@ -109,15 +111,17 @@ if (sizeof($chosen) !== 1) {
     $thing_ts = date(TIMESTAMP_FORMAT);
     $thing_uploader = STANDARD_USER;
     $thing_name = $chosen[0][1];
-    // tag is first three letters of name if avail and number of items
-    // already in db
+    $thing_nuance = '';
     $thing_tag = $things->getNewTag($thing_name);
-
-    shell_exec("php api/thing_add.php \"$projname\" \"$thing_type\" \"$thing_tag\" \"$thing_ts\" \"$thing_uploader\" \"$thing_name\"");
-    shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php \"$projname\" \"$thing_tag\"");
+    shell_exec("php api/thing_add.php \"$projname\" \"$thing_type\" " .
+	       "\"$thing_tag\" \"$thing_ts\" \"$thing_uploader\" " .
+	       "\"$thing_name\" \"$thing_nuance\"");
+    shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php " .
+	       "\"$projname\" \"$thing_tag\"");
     $things->load();
 
-  } elseif ($chosen[0][3] !== $ALREADYPRESENT && $chosen[0][3] !== $LINKTOOLD) {
+  } elseif ($chosen[0][3] !== $ALREADYPRESENT &&
+	    $chosen[0][3] !== $LINKTOOLD) {
     $effort->err(__FILE__, "unexpected chosen data");
     exit;
 
@@ -137,7 +141,8 @@ if (sizeof($chosen) !== 1) {
     }
   }
   if ($found === false) {
-    shell_exec("php api/link_add.php \"$projname\" \"$thing_to_add_to\" \"$thing_tag\"");
+    shell_exec("php api/link_add.php \"$projname\" \"$thing_to_add_to\" " .
+	       "\"$thing_tag\"");
     $links->load();
   }
 }

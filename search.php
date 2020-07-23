@@ -3,8 +3,8 @@
 /*
   search
 
-  obtain from the user the name of something he wants to search for
-  and return to him the results of it
+  Obtain from the user the name of something he wants to search for and return
+  to him the results of it
 */
 
 require_once('defines.php');
@@ -65,7 +65,8 @@ if ($search_phrase === '') {
   // $ASNEW = 0;
   $ALREADYPRESENT = 1;
   $LINKTOOLD = 2;
-  if (sizeof($exact_arr) == 0 && sizeof($found_arr) == 0 && sizeof($exact_tag_arr) == 0) {
+  if (sizeof($exact_arr) == 0 && sizeof($found_arr) == 0 &&
+      sizeof($exact_tag_arr) == 0) {
     // search came up empty.
     $crib = array();
     $tag = 'S';
@@ -81,7 +82,8 @@ if ($search_phrase === '') {
 
     if (sizeof($exact_tag_arr)) {
       foreach($exact_tag_arr as $item) {
-	$dialog_found->choice_add($n, $item->text() . ' (' . $item->tag() . ') tag match');
+	$dialog_found->choice_add($n, $item->getTextAndNuance() . ' (' .
+				  $item->tag() . ') tag match');
 	$crib[] = array($n, $item->text(), $item->tag(), $ALREADYPRESENT);
 	$n++;
       }
@@ -89,7 +91,8 @@ if ($search_phrase === '') {
 
     if (sizeof($exact_arr)) {
       foreach($exact_arr as $item) {
-	$dialog_found->choice_add($n, $item->text() . ' (' . $item->tag() . ') exact match');
+	$dialog_found->choice_add($n, $item->getTextAndNuance() . ' (' .
+				  $item->tag() . ') exact match');
 	$crib[] = array($n, $item->text(), $item->tag(), $ALREADYPRESENT);
 	$n++;
       }
@@ -97,7 +100,8 @@ if ($search_phrase === '') {
 
     if (sizeof($found_arr)) {
       foreach($found_arr as $item) {
-	$dialog_found->choice_add($n, $item->text() . ' (' . $item->tag() . ') close match');
+	$dialog_found->choice_add($n, $item->getTextAndNuance() . ' (' .
+				  $item->tag() . ') close match');
 	$crib[] = array($n, $item->text(), $item->tag(), $LINKTOOLD);
 	$n++;
       }

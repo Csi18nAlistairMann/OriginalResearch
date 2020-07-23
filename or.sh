@@ -30,7 +30,9 @@ ARG='?';
 while [ 1 -eq 1 ]; do
     # Flip between Things to show until a menu item
     # is requested
-    while [ "$ARG" != '/' ] && [ "$ARG" != '.' ] && [ "$ARG" != '>' ] && [ "$ARG" != 'RV' ] && [ "$ARG" != 'RA' ] && [ "$ARG" != 'RM' ] && [ "$ARG" != 'S' ] && [ "$ARG" != ';' ]; do
+    while [ "$ARG" != '/' ] && [ "$ARG" != '.' ] && [ "$ARG" != '>' ] && \
+	[ "$ARG" != 'RV' ] && [ "$ARG" != 'RA' ] && [ "$ARG" != 'RM' ] && \
+	[ "$ARG" != 'S' ] && [ "$ARG" != ';' ] && [ "$ARG" != '[' ]; do
 	php show-thing.php "$PROJNAME" $ARG
 	ARG=$(cat $WAT_DO_NEXT)
     done;
@@ -69,6 +71,9 @@ while [ 1 -eq 1 ]; do
 
     elif [ "$ARG" = ';' ]; then
 	php add-aka.php "$PROJNAME" $ONSHOW
+
+    elif [ "$ARG" = '[' ]; then
+	php edit-nuance.php "$PROJNAME" $ONSHOW
     fi;
 
     ARG=$(cat $WAT_DO_NEXT)
