@@ -33,6 +33,12 @@ $dialog_search->sizes_change(MENU_SZ_SHORT);
 $dialog_search->input = 'Which tag should be an AKA?';
 $search_phrase = $dialog_search->show();
 
+if ($search_phrase === '') {
+  $tag = $effort->wereLookingAt();
+  $effort->whatToShowNext($tag);
+  return;
+}
+
 $things = new things($projname);
 $things->load();
 $found_arr = array();

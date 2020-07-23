@@ -50,9 +50,10 @@ $dialog->sizes_change(MENU_SZ_SHORT);
 $dialog->input = 'Edit new nuance ';
 $thing_name = $dialog->show();
 
-// store the edited name
-$things->db[$record_idx]->nuance($thing_name);
-$things->save();
-
+if ($thing_name !== '') {
+  // store the edited name
+  $things->db[$record_idx]->nuance($thing_name);
+  $things->save();
+}
 $effort->whatToShowNext($thing_id);
 ?>

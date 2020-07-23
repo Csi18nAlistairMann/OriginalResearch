@@ -20,6 +20,7 @@ class dialog
   public $input_init = '';
   public $menu = '';
   public $msg = '';
+  public $show_cancel = true;
   public $sizes = MENU_SZ_LONG;
   public $title = '';
 
@@ -43,6 +44,9 @@ class dialog
 	$cmd .= "'" . $this->escape($this->input_init) . "' ";
 
     } elseif ($this->menu !== '') {
+      if ($this->show_cancel === false) {
+	$cmd .= '--nocancel ';
+      }
       $cmd .= "--menu '" . $this->escape($this->menu) . "' " .
 	$this->escape($this->sizes) . " " . $this->choices;
 

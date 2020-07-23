@@ -33,6 +33,12 @@ $dialog_search->sizes_change(MENU_SZ_SHORT);
 $dialog_search->input = 'Search/Add on what name?';
 $search_phrase = $dialog_search->show();
 
+if ($search_phrase === '') {
+  $tag = $effort->wereLookingAt();
+  $effort->whatToShowNext($tag);
+  return;
+}
+
 // Establish what might match the user's input
 $things = new things($projname);
 $things->load();
@@ -87,8 +93,9 @@ $dialog_found->menu = $thing_text;
 $output = $dialog_found->show();
 
 if ($output === '') {
-  print_r("Cancelled");
-  exit;
+  $tag = $effort->wereLookingAt();
+  $effort->whatToShowNext($tag);
+  return;
 }
 
 // what got chosen?

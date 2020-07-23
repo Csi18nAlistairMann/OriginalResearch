@@ -127,8 +127,11 @@ $dialog->choice_add('>', 'Break link to (' . $were_looking_at_tag . ') ' .
 // now show the dialog
 $dialog->title = $thing_type . ' #' . $thing_id;
 $dialog->menu = $thing_text;
+$dialog->show_cancel = false;
 $output = $dialog->show();
 
 // and now link the thing back to the original thing
-$effort->whatToShowNext($output);
+if ($output !== '') {
+  $effort->whatToShowNext($output);
+}
 ?>
