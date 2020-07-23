@@ -32,6 +32,9 @@ $dialog->sizes_change(MENU_SZ_SHORT);
 $dialog->edit = $tempfile;
 $review_text = trim($dialog->show());
 
-shell_exec("php api/review_add.php \"$projname\" \"$review_ts\" \"$uploader\" \"$review_text\" \"$record_to_show\"");
+if ($review_text !== '') {
+  shell_exec("php api/review_add.php \"$projname\" \"$review_ts\" " .
+	     "\"$uploader\" \"$review_text\" \"$record_to_show\"");
+}
 $effort->whatToShowNext($record_to_show);
 ?>
