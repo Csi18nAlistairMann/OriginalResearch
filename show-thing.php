@@ -20,7 +20,6 @@ $dialog = new dialog;
 if ($argc !== 3) {
   $effort->err(__FILE__, "Bad args? [project name] [record to show]");
   $record_to_show = 0;
-  sleep(10);
 
 } else {
   $projname = $argv[1];
@@ -63,6 +62,10 @@ $thing_id = $things->db[$record_idx]->tag();
 $thing_ts = $things->db[$record_idx]->timestamp();
 $thing_user = $things->db[$record_idx]->user();
 $thing_name = $things->db[$record_idx]->text();
+$thing_nuance = $things->db[$record_idx]->nuance();
+$thing_text = $things->db[$record_idx]->getTextAndNuance();
+$thing_text .= " (User:$thing_user @:$thing_ts)";
+
 
 $effort->wereLookingAt($thing_id);
 
@@ -117,9 +120,9 @@ $dialog->choice_add('RV', 'View reviews');
 $dialog->choice_add('RA', 'Add review');
 $dialog->choice_add('RM', 'Mark reviewed');
 $dialog->choice_add('S', 'Search');
-$dialog->choice_add('>', 'Break link to (' . $were_looking_at_tag . ') ' . $were_looking_at_name);
-
-$thing_text = "$thing_name (User:$thing_user @:$thing_ts)";
+$dialog->choice_add('[', 'Edit nuance');
+$dialog->choice_add('>', 'Break link to (' . $were_looking_at_tag . ') ' .
+		    $were_looking_at_name);
 
 // now show the dialog
 $dialog->title = $thing_type . ' #' . $thing_id;

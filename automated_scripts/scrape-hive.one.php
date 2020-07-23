@@ -3,8 +3,7 @@
 /*
   scrape-hive.one.php
 
-  Scrape names/twitter links from a manual copy of the hive.one
-  website
+  Scrape names/twitter links from a manual copy of the hive.one website
 
   1. Visit hive.one/bitcoin
   2. Page down to bottom so we see 500, not 50
@@ -48,7 +47,8 @@ $things = new things($projname);
 $things->load();
 
 while(strlen($source) > 0) {
-  list($rank, $person, $handle, $score, $following, $followers, $change, $rest) =
+  list($rank, $person, $handle, $score, $following, $followers, $change,
+       $rest) =
     explode("\n", $source, 8);
   $name = trim(convert_to_normal_text($person));
 
@@ -59,22 +59,27 @@ while(strlen($source) > 0) {
     $ttr_thing_ts = date(TIMESTAMP_FORMAT);
     $ttr_thing_uploader = STANDARD_USER;
     $ttr_thing_name = $twitter_url;
+    $ttr_thing_nuance = '';
     $ttr_thing_tag = $things->getNewTag($ttr_thing_name);
 
-    shell_exec("php api/thing_add.php \"$projname\" \"$ttr_thing_type\" \"$ttr_thing_tag\" \"$ttr_thing_ts\" \"$ttr_thing_uploader\" \"$ttr_thing_name\"");
+    shell_exec("php api/thing_add.php \"$projname\" \"$ttr_thing_type\" " .
+	       "\"$ttr_thing_tag\" \"$ttr_thing_ts\" \"$ttr_thing_uploader\" " .
+	       "\"$ttr_thing_name\" \"$ttr_thing_nuance\"");
     $things->load();
-    shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php \"$projname\" \"$ttr_thing_tag\"");
+    shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php " .
+	       "\"$projname\" \"$ttr_thing_tag\"");
 
   } else {
     $ttr_thing_tag = $ttr_existing_tag;
-    shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php \"$projname\" \"$ttr_thing_tag\"");
+    shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php " .
+	       "\"$projname\" \"$ttr_thing_tag\"");
   }
 
   // Do we already have this guys proper name?
   $people_tag = $things->getTagFor('People');
   $existing_name_tag = $things->getTagFor($name);
   if ($existing_name_tag === false) {
-    // No.
+    // Tag not found.
     print_r("DIY -- Don't have exact match for '$name' - DIY\n");
     // add a thing under this name, and link it in
     // 1. add in the name as thing we dont already have, get back its tag
@@ -82,20 +87,27 @@ while(strlen($source) > 0) {
     $newname_thing_ts = date(TIMESTAMP_FORMAT);
     $newname_thing_uploader = STANDARD_USER;
     $newname_thing_name = $name;
+    $newname_thing_nuance = '';
     $newname_thing_tag = $things->getNewTag($newname_thing_name);
 
-    $output = shell_exec("php api/thing_add.php \"$projname\" \"$newname_thing_type\" \"$newname_thing_tag\" \"$newname_thing_ts\" \"$newname_thing_uploader\" \"$newname_thing_name\"");
+    $output = shell_exec("php api/thing_add.php \"$projname\" " .
+			 "\"$newname_thing_type\" \"$newname_thing_tag\" " .
+			 "\"$newname_thing_ts\" \"$newname_thing_uploader\" " .
+			 "\"$newname_thing_name\" \"$newname_thing_nuance\"");
     $things->load();
-    $output = shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php \"$projname\" \"$newname_thing_tag\"");
+    $output = shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php " .
+			 "\"$projname\" \"$newname_thing_tag\"");
 
     // 2. link that tag to the twitter link received above
-    shell_exec("php api/link_add.php \"$projname\" \"$ttr_thing_tag\" \"$newname_thing_tag\"");
+    shell_exec("php api/link_add.php \"$projname\" \"$ttr_thing_tag\" " .
+	       "\"$newname_thing_tag\"");
     // And also link that new name to the People tag
-    shell_exec("php api/link_add.php \"$projname\" \"$people_tag\" \"$newname_thing_tag\"");
+    shell_exec("php api/link_add.php \"$projname\" \"$people_tag\" " .
+	       "\"$newname_thing_tag\"");
 
-    // 3. Does the twitter handle we have already itself link to someone
-    //    who is linked to People? If so, this newname we just added is
-    //    probably an AKA
+    // 3. Does the twitter handle we have already itself link to someone who is
+    //    linked to People? If so, this newname we just added is probably an
+    //    AKA
     //
     // - take twitter tag
     // - retrieve all links with that tag
@@ -111,17 +123,20 @@ while(strlen($source) > 0) {
       $links2db = $links->filter($link1);
       foreach($links2db as $link2) {
 	if ($link2 === $people_tag) {
-	  shell_exec("php api/aka_add.php \"$projname\" \"$link1\" \"$newname_thing_tag\"");
+	  shell_exec("php api/aka_add.php \"$projname\" \"$link1\" " .
+		     "\"$newname_thing_tag\"");
 	}
       }
     }
 
   } else {
-    // Yes.
+    // Tag IS found.
     // As we already have the link, this call will ultimately return having
     // not added the link
-    shell_exec("php api/link_add.php \"$projname\" \"$existing_name_tag\" \"$people_tag\"");
-    shell_exec("php api/link_add.php \"$projname\" \"$existing_name_tag\" \"$ttr_thing_tag\"");
+    shell_exec("php api/link_add.php \"$projname\" \"$existing_name_tag\" " .
+	       "\"$people_tag\"");
+    shell_exec("php api/link_add.php \"$projname\" \"$existing_name_tag\" " .
+	       "\"$ttr_thing_tag\"");
   }
   print_r($rank . ' ' . $twitter_url . ' ' . $name . ' ' . "\n");
 

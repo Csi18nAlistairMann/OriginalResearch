@@ -13,8 +13,8 @@ $effort = new effort02;
 
 // What we're searching for and what we'll link it to
 $rv = 1;
-if ($argc !== 7) {
-  $effort->err(__FILE__, "expected six arguments");
+if ($argc !== 8) {
+  $effort->err(__FILE__, "expected seven arguments");
 
 } else {
   $projname = $argv[1];
@@ -23,10 +23,12 @@ if ($argc !== 7) {
   $ts = $argv[4];
   $user = $argv[5];
   $text = $argv[6];
+  $nuance = $argv[7];
 
   $things = new things($projname);
   $things->load();
   $thing = new thing;
+  $thing->nuance($nuance);
   $thing->type($type);
   $thing->tag($tag);
   $thing->timestamp($ts);

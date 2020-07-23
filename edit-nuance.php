@@ -1,9 +1,9 @@
 <?php
 
 /*
-  edit-thing
+  edit-nuance
 
-  Given thing N, allow user to edit its name
+  Given thing N, allow user to edit the associated nuance
 */
 
 require_once('defines.php');
@@ -47,14 +47,12 @@ $thing_text .= " (User:$thing_user @:$thing_ts)";
 
 // now show the dialog
 $dialog->sizes_change(MENU_SZ_SHORT);
-$dialog->input = 'Edit new name for ' . $thing_text;
+$dialog->input = 'Edit new nuance ';
 $thing_name = $dialog->show();
 
-if ($thing_name !== '') {
-  // store the edited name
-  $things->db[$record_idx]->text($thing_name);
-  $things->save();
-}
+// store the edited name
+$things->db[$record_idx]->nuance($thing_name);
+$things->save();
 
 $effort->whatToShowNext($thing_id);
 ?>
