@@ -11,4 +11,6 @@ define("TIMESTAMP_FORMAT", 'YmdHis');
 define("STANDARD_USER", '120');
 define("TYPE_TEST_THING", 'test-thing');
 
+define("PREDICATE_LINKS", 0);
+define("PREDICATE_AKA_OF", 1);
 ?>

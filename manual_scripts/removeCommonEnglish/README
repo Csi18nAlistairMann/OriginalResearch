@@ -1,0 +1,56 @@
+remove.php
+
+Overview.
+Given a source S, display such words that do not already appear in the three
+skiplists G, O or P.
+
+Usage:
+- via standard input
+cat <source> | php remove.php [-g|--general-words <dict>] [-o|--or-words <dict>]
+ [-p|--personal-words <dict>]
+- via file
+php remove.php [-g|--general-words <dict>] [-o|--or-words <dict>]
+ [-p|--personal-words <dict>] [-s|--source <file>]
+
+That source S might, for instance, be a transcript.
+
+The three skiplists are:
+G: words that are common because they appear in a standard dictionary. I use a
+dictionary formed of both British and American spellings
+O: words we already track because they appear as a Thing in the database
+P: words that I know I don't want to track
+
+Words that survive to be displayed may represent the name of something we should
+investigate and either add as a Thing to the database, or add to the P skiplist
+as something we want to ignore.
+
+
+Before initial use.
+Program needs a copy of English words it can safely ignore. On my (old) copy of
+Linux, I used:
+$ cat /usr/share/dict/british-english /usr/share/dict/american-english | sort \
+-u -o uk-us-english-2011
+Which forms a single flat file of unique British and American words.
+
+
+Workflow.
+1. Obtain latest or-words by running
+$ php manual_scripts/display-or-words.php btc >/tmp/or-words
+2. Run against remove.php as above
+$ cat /tmp/email | php remove.php -g uk-us-english-2011 --or-words \
+ "/tmp/or-words" --personal-words my-words
+100x
+3d
+achille's
+...
+$
+3. For each entry on the resulting list should be
+   a. Add as a new thing to or.sh if it is Interesting. Entry will be:
+      i. Excluded from following runs
+      ii. Available in or.sh
+   b. Add to my-words if it is Not Interesting. Will be:
+      i. Excluded from following runs
+   c. Research
+      i. Examine context of original use. Spyllchucked? Add to my-words
+      ii. Novel use such as a name? Add to or.sh
+   d. cat my-words | sort -u -o my-words

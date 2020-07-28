@@ -3,8 +3,8 @@
 /*
   developers_tend_to_have_repos.php
 
-  Generally speaking, if $people is linked to $developer, then
-  $people should also be linked to a thing that links to $repos
+  Generally speaking, if $people is linked to $developer, then $people should
+  also be linked to a thing that links to $repos
 
   $people.things = Scan things for anyone linked to people
   $devs.things = Scan $people for anyone linked to developers
@@ -14,8 +14,8 @@
   $probs.things = Scan $devs for anyone not linked to one or more of $repos
  */
 
-// argv[1] will contain a pathandfile that contains the arguments
-// to look at, OR is "ALL".
+// argv[1] will contain a pathandfile that contains the arguments to look at,
+// OR is "ALL".
 
 require_once('classes/effort02_class.php');
 require_once('classes/links_class.php');
@@ -72,8 +72,8 @@ if ($rv === 0) {
   $links->load();
   $tag_arr2 = array();
   foreach($links->db as $link) {
-    $a = $link->from();
-    $b = $link->to();
+    $a = $link->subject();
+    $b = $link->object();
     $person = null;
     if ($a === $people_tag) {
       $person = $b;
@@ -97,8 +97,8 @@ if ($rv === 0) {
 
   $devs_arr = array();
   foreach($links->db as $link) {
-    $a = $link->from();
-    $b = $link->to();
+    $a = $link->subject();
+    $b = $link->object();
     $person = null;
     if ($a === $developers_tag) {
       $person = $b;
@@ -127,8 +127,8 @@ if ($rv === 0) {
 
   $repos_arr = array();
   foreach($links->db as $link) {
-    $a = $link->from();
-    $b = $link->to();
+    $a = $link->subject();
+    $b = $link->object();
     $repo = null;
     if ($a === $repos_tag && $a !== $toplevel_tag) {
       $repo = $b;
@@ -144,8 +144,8 @@ if ($rv === 0) {
   } // repos_arr contains everything that links to Repo
   // so, github ...
 
-  // Filter down to anything connected to one of the
-  // repos above but not Repos itself
+  // Filter down to anything connected to one of the repos above but not Repos
+  // itself
   $l2repos_arr = array();
   foreach($repos_arr as $repo) {
     $tag_arr = $links->filter($repo); // all things attached to [github]
@@ -160,9 +160,9 @@ if ($rv === 0) {
     $found = false;
     foreach($links->db as $link) {
       foreach($l2repos_arr as $url) {
-	if (($link->from() === $dev && $link->to() === $url)
+	if (($link->subject() === $dev && $link->object() === $url)
 	    ||
-	    ($link->from() === $url && $link->to() === $dev)) {
+	    ($link->subject() === $url && $link->object() === $dev)) {
 	  $found = true;
 	}
       }

@@ -3,15 +3,14 @@
 /*
   show-review
 
-  Given a particular tag, display all the reviews associated
-  with it.
+  Given a particular tag, display all the reviews associated with it.
 */
 
 require_once('defines.php');
 require_once('classes/dialog_common.php');
 require_once('classes/reviews_class.php');
 require_once('classes/effort02_class.php');
-require_once('classes/akas_class.php');
+require_once('classes/links_class.php');
 
 $effort = new effort02;
 $dialog = new dialog;
@@ -25,21 +24,21 @@ if ($argc !== 3) {
   $record_to_show = $argv[2];
 }
 
-// We don't just want reviews for $record_to_show, we also want
-// reviews for anything it's AKA
-$akas = new akas($projname);
-$akas->load();
-$akas_db1 = $akas->filter($record_to_show);
-$akas_db2 = array_merge(array($record_to_show), $akas_db1);
+// We don't just want reviews for $record_to_show, we also want reviews for
+// anything it's AKA
+$links = new links($projname);
+$links->load();
+$links_db1 = $links->filter($record_to_show, PREDICATE_AKA_OF);
+$links_db2 = array_merge(array($record_to_show), $links_db1);
 
-// work through the things we have looking for the tag or the
-// first thing with a tag
+// work through the things we have looking for the tag or the first thing with
+// a tag
 $reviews = new reviews($projname);
 $reviews->load();
 $show = array();
 foreach($reviews->db as $item) { // for each review
-  foreach($akas_db2 as $aka_tag) { // consider each tag in the akas
-    if ($aka_tag === $item->tag())
+  foreach($links_db2 as $tag) { // consider each tag in the akas
+    if ($tag === $item->tag())
       $show[] = $item;
   }
 }

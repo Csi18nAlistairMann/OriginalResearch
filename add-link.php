@@ -20,17 +20,22 @@ $dialog_search = new dialog;
 $dialog_found = new dialog;
 
 // What we'll link to
-if ($argc === 2) {
+if ($argc === 3) {
   $thing_to_add_to = 0;
 
 } else {
   $projname = $argv[1];
   $thing_to_add_to = $argv[2];
+  $predicate = intval($argv[3]);
 }
 
 // obtain the name to be searched for/added
 $dialog_search->sizes_change(MENU_SZ_SHORT);
-$dialog_search->input = 'Search/Add on what name?';
+$request = 'Search/Add on what name?';
+if ($predicate === PREDICATE_AKA_OF) {
+  $request = 'AKA: ' . $request;
+}
+$dialog_search->input = $request;
 $search_phrase = $dialog_search->show();
 
 if ($search_phrase === '') {
@@ -89,6 +94,9 @@ $thing_type = 'thing type';
 $thing_id = -1;
 $dialog_found->title = $thing_type . ' #' . $thing_id;
 $thing_text = 'thing text';
+if ($predicate === PREDICATE_AKA_OF) {
+  $thing_text = 'AKA text';
+}
 $dialog_found->menu = $thing_text;
 $output = $dialog_found->show();
 
@@ -141,15 +149,17 @@ if (sizeof($chosen) !== 1) {
   $links->load();
   $found = false;
   foreach($links->db as $item) {
-    if (($item->from() === $thing_to_add_to && $item->to() === $thing_tag)
+    if (($item->subject() === $thing_to_add_to &&
+	 $item->object() === $thing_tag)
 	||
-	($item->to() === $thing_to_add_to && $item->from() === $thing_tag)) {
+	($item->object() === $thing_to_add_to &&
+	 $item->subject() === $thing_tag)) {
       $found = true;
     }
   }
   if ($found === false) {
-    shell_exec("php api/link_add.php \"$projname\" \"$thing_to_add_to\" " .
-	       "\"$thing_tag\"");
+    shell_exec("php api/link_add.php \"$projname\" \"$thing_tag\" " .
+	       $predicate . " \"$thing_to_add_to\"");
     $links->load();
   }
 }

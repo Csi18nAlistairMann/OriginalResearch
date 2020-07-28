@@ -3,21 +3,21 @@
 /*
   template-url-connects-to-thing
 
-  Given a URL and a tag, any Thing which starts with that URL
-  should mandatorily also link to that tag.
+  Given a URL and a tag, any Thing which starts with that URL should
+  mandatorily also link to that tag.
 
-  For example, a Thing which starts "https://twitter.com/" must
-  automatically be linked to tag "Twitter" whether or not the
-  user has already done it. (Although if he has, this code will
-  not repeat it.)
+  For example, a Thing which starts "https://twitter.com/" must automatically
+  be linked to tag "Twitter" whether or not the user has already done it.
+  (Although if he has, this code will not repeat it.)
 
-  This code will apply the rules to a single URL and tag and is
-  called by mandatory-connect-urls-to-things.php
+  This code will apply the rules to a single URL and tag and is called by
+  mandatory-connect-urls-to-things.php
 */
 
-// argv[1] will contain a pathandfile that contains the arguments
-// to look at, OR is "ALL".
+// argv[1] will contain a pathandfile that contains the arguments to look at,
+// or is "ALL".
 
+require_once('defines.php');
 require_once('classes/effort02_class.php');
 require_once('classes/links_class.php');
 require_once('classes/things_class.php');
@@ -88,8 +88,8 @@ if ($rv === 0) {
   foreach($tag_arr as $tag) {
     $thing = $things->getThingFromTag($tag);
     if ($thing === null) {
-      // bodge to accomodate that the new thing was not added on the
-      // grounds it would be a duplicate
+      // Bodge to accomodate that the new thing was not added on the grounds it
+      // would be a duplicate
 
     } else {
       $tag_last_checked = $automated_cribs->getTagLastChecked($tag);
@@ -97,7 +97,7 @@ if ($rv === 0) {
 	  $tag_last_checked <= $thing->timestamp()) {;
 	$automated_cribs->setTagLastChecked($tag, $thing->timestamp());
 	if (strpos($thing->text(), $urlroot) !== false) {
-	  if ($links->linkTags($tag, $thingtag) == 0)
+	  if ($links->linkTags($tag, PREDICATE_LINKS, $thingtag) == 0)
 	    $changes++;
 	}
       }

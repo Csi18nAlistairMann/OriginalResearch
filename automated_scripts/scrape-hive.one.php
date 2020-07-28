@@ -63,8 +63,9 @@ while(strlen($source) > 0) {
     $ttr_thing_tag = $things->getNewTag($ttr_thing_name);
 
     shell_exec("php api/thing_add.php \"$projname\" \"$ttr_thing_type\" " .
-	       "\"$ttr_thing_tag\" \"$ttr_thing_ts\" \"$ttr_thing_uploader\" " .
-	       "\"$ttr_thing_name\" \"$ttr_thing_nuance\"");
+	       "\"$ttr_thing_tag\" \"$ttr_thing_ts\" " .
+	       "\"$ttr_thing_uploader\" \"$ttr_thing_name\" " .
+	       "\"$ttr_thing_nuance\"");
     $things->load();
     shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php " .
 	       "\"$projname\" \"$ttr_thing_tag\"");
@@ -100,10 +101,10 @@ while(strlen($source) > 0) {
 
     // 2. link that tag to the twitter link received above
     shell_exec("php api/link_add.php \"$projname\" \"$ttr_thing_tag\" " .
-	       "\"$newname_thing_tag\"");
+	       PREDICATE_LINKS  . " \"$newname_thing_tag\"");
     // And also link that new name to the People tag
     shell_exec("php api/link_add.php \"$projname\" \"$people_tag\" " .
-	       "\"$newname_thing_tag\"");
+	       PREDICATE_LINKS  . " \"$newname_thing_tag\"");
 
     // 3. Does the twitter handle we have already itself link to someone who is
     //    linked to People? If so, this newname we just added is probably an
@@ -123,8 +124,8 @@ while(strlen($source) > 0) {
       $links2db = $links->filter($link1);
       foreach($links2db as $link2) {
 	if ($link2 === $people_tag) {
-	  shell_exec("php api/aka_add.php \"$projname\" \"$link1\" " .
-		     "\"$newname_thing_tag\"");
+	  shell_exec("php api/link_add.php \"$projname\" \"$link1\" " .
+		     PREDICATE_AKA_OF . " \"$newname_thing_tag\"");
 	}
       }
     }
@@ -134,9 +135,9 @@ while(strlen($source) > 0) {
     // As we already have the link, this call will ultimately return having
     // not added the link
     shell_exec("php api/link_add.php \"$projname\" \"$existing_name_tag\" " .
-	       "\"$people_tag\"");
+	       PREDICATE_LINKS  . " \"$people_tag\"");
     shell_exec("php api/link_add.php \"$projname\" \"$existing_name_tag\" " .
-	       "\"$ttr_thing_tag\"");
+	       PREDICATE_LINKS  . " \"$ttr_thing_tag\"");
   }
   print_r($rank . ' ' . $twitter_url . ' ' . $name . ' ' . "\n");
 

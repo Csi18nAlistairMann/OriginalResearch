@@ -3,7 +3,7 @@
 /*
   link_add
 
-  Entry point for CLI requests to add a simple link
+  Entry point for CLI requests to edit a simple link
  */
 
 require_once('classes/effort02_class.php');
@@ -30,16 +30,12 @@ if ($argc !== 5) {
     if (($link->subject() === $subject && $link->object() === $object)
 	||
 	($link->object() === $subject && $link->subject() === $object)) {
-      $found = true;
+      $link->subject($subject);
+      $link->predicate($predicate);
+      $link->object($object);
+      $links->save();
+      break;
     }
-  }
-  if ($found === false) {
-    $link = new link;
-    $link->subject($subject);
-    $link->predicate($predicate);
-    $link->object($object);
-    $links->db[] = $link;
-    $rv =  $links->save();
   }
 }
 
