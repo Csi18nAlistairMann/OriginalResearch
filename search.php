@@ -43,12 +43,14 @@ if ($search_phrase === '') {
   // search on that phrase
   $things = new things($projname);
   $things->load();
+  $links = new links($projname);
+  $links->load();
   $found_arr = array();
   $exact_arr = array();
   $exact_tag_arr = array();
   $lsearch_phrase = strtolower($search_phrase);
   foreach($things->db as $item) {
-    $exact_arr2 = $item->textIs($projname, $lsearch_phrase);
+    $exact_arr2 = $item->textIs($lsearch_phrase, $things, $links);
     $found_arr2 = $item->textStrPos($lsearch_phrase);
 
     if (sizeof($exact_arr2) > 0) {

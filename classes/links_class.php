@@ -1,22 +1,32 @@
 <?php
 
+require_once('defines.php');
+
 class link
 {
-  private $from = null;
-  private $to = null;
+  private $subject = null;
+  private $predicate = null;
+  private $object = null;
 
-  function from($val = null) {
+  function subject($val = null) {
     if ($val === null)
-      return $this->from;
+      return $this->subject;
     else
-      $this->from = $val;
+      $this->subject = $val;
   }
 
-  function to($val = null) {
+  function predicate($val = null) {
     if ($val === null)
-      return $this->to;
+      return $this->predicate;
     else
-      $this->to = $val;
+      $this->predicate = intval($val);
+  }
+
+  function object($val = null) {
+    if ($val === null)
+      return $this->object;
+    else
+      $this->object = $val;
   }
 }
 
@@ -41,33 +51,48 @@ class links
     return file_put_contents($this->db_file, serialize($this->db));
   }
 
-  function filter($tag) {
+  function filter($tag, $predicate = -1) {
     $db = array();
     foreach($this->db as $item) {
-      if ($item->from() === $tag) {
-	$db[] = $item->to();
-      } elseif ($item->to() === $tag) {
-	$db[] = $item->from();
+      if ($predicate !== -1 && $item->predicate() !== $predicate) {
+	continue;
+      }
+      if ($item->subject() === $tag) {
+	$db[] = $item->object();
+      } elseif ($item->object() === $tag) {
+	$db[] = $item->subject();
       }
     }
     return $db;
   }
 
-  function linkTags($tag1, $tag2) {
+  function getLinkFromTags($tags, $tago) {
+    foreach($this->db as $link) {
+      if (($link->subject() === $tags && $link->object() === $tago)
+	  ||
+	  ($link->object() === $tags && $link->subject() === $tago)) {
+	return $link;
+      }
+    }
+    return null;
+  }
+
+  function linkTags($subject, $predicate, $object) {
     $rv = 1;
     $found = false;
     foreach($this->db as $l) {
-      if (($l->from() === $tag1 && $l->to() === $tag2)
+      if (($l->subject() === $subject && $l->object() === $object)
 	||
-	  ($l->from() === $tag2 && $l->to() === $tag1)) {
+	  ($l->subject() === $object && $l->object() === $subject)) {
 	$found = true;
 	break;
       }
     }
     if ($found === false) {
       $link = new link;
-      $link->from($tag1);
-      $link->to($tag2);
+      $link->subject($subject);
+      $link->predicate($predicate);
+      $link->object($object);
       $this->db[] = $link;
       $this->save();
       $rv = 0;

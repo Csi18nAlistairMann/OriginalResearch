@@ -1,6 +1,6 @@
 <?php
 
-require_once('classes/akas_class.php');
+require_once('classes/links_class.php');
 
 class thing
 {
@@ -63,38 +63,32 @@ class thing
   }
 
   /*
-    The nature of the AKA is that 'Del' is identical to 'Derek'. This is
-    accomplished here by seeing if a phrase being searched for matches this
-    item's text, or any item's text where that second item is connected to this
-    one in akas.serialised.
+    textIs
+
+    Return Things matching a given string, and anything of which such matches
+    are an AKA.
+
+    This is processing intensive so for the moment I'm leaving it turned off by
+    returning early.
    */
-  function textIs($projname, $phrase) {
+  function textIs($phrase, $things, $links) {
     $rv = array();
     if ($phrase === strtolower($this->text())) {
       $rv[] = $this;
     }
     return $rv;
-    /* // now check if any AKA of this Thing matches. That is, while */
-    /* // we are searching on Del, and this Thing is Derek */
-    /* $akas = new akas($projname); */
-    /* $akas->load(); */
-    /* $akas_db = $akas->filter($this->tag()); */
-    /* $things = new things($projname); */
-    /* $things->load(); */
 
-    /* foreach($akas_db as list($aka_from, $aka_to)) { */
-    /*   if ($aka_from === $this->tag()) */
-    /*	$aka_tag = $aka_to; */
-    /*   else */
-    /*	$aka_tag = $aka_from; */
+    // Now check if this is an AKA of something else. If it is, count that
+    // something else as a match too.
+    $links_db = $links->filter($this->tag(), PREDICATE_AKA_OF);
+    foreach($links_db as $link_tag) {
+      $aka = $things->getThingFromTag($link_tag);
 
-    /*   $aka = $things->getThingFromTag($aka_tag); */
-
-    /*   if ($phrase === strtolower($aka->text())) { */
-    /*	$rv[] = $this; */
-    /*   } */
-    /* } */
-    /* return $rv; */
+      if ($phrase === strtolower($aka->text())) {
+	$rv[] = $this;
+      }
+    }
+    return $rv;
   }
 
   function textStrPos($phrase) {
@@ -144,10 +138,19 @@ class things
     return array_unique($tag_arr);
   }
 
-  function getTagFor($text) {
-    foreach($this->db as $thing) {
-      if ($thing->text() === $text) {
-	return $thing->tag();
+  function getTagFor($text, $lower = false) {
+    if ($lower === true) {
+      foreach($this->db as $thing) {
+	if (strtolower($thing->text()) === $text) {
+	  return $thing->tag();
+	}
+      }
+
+    } else {
+      foreach($this->db as $thing) {
+	if ($thing->text() === $text) {
+	  return $thing->tag();
+	}
       }
     }
     return false;

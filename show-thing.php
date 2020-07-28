@@ -11,7 +11,6 @@ require_once('classes/dialog_common.php');
 require_once('classes/things_class.php');
 require_once('classes/links_class.php');
 require_once('classes/effort02_class.php');
-require_once('classes/akas_class.php');
 
 $effort = new effort02;
 $dialog = new dialog;
@@ -66,32 +65,17 @@ $thing_nuance = $things->db[$record_idx]->nuance();
 $thing_text = $things->db[$record_idx]->getTextAndNuance();
 $thing_text .= " (User:$thing_user @:$thing_ts)";
 
-
 $effort->wereLookingAt($thing_id);
-
-// Does our Thing have an AKA?
-$akas = new akas($projname);
-$akas->load();
-$akas_db = $akas->filter($thing_id);
-
-// so we now want to know about things that link to
-// $things->db[$record_idx]->tag() (thing_id) or any in $akas[]
 
 // What does $thing_id connect to? What connects to it?
 $links = new links($projname);
 $links->load();
 $connections = array();
 $connections = array_merge($links->filter($thing_id), $connections);
-foreach($akas_db as $akas_tag) {
-  $thing_name .= ' aka:' . $akas_tag;
-  $filter_arr = $links->filter($akas_tag);
-  if (sizeof($filter_arr) > 0) {
-    $connections = array_unique(array_merge($filter_arr, $connections));
-  }
-}
 
 // prepare the links for showing, with a default for no links
 $output_choices = '';
+$akas_text = '';
 if (sizeof($connections) !== 0) {
   // for each thing we have
   foreach($things->db as $item) {
@@ -100,11 +84,26 @@ if (sizeof($connections) !== 0) {
       if ($item->tag() === $connection) {
 	if ($item->tag() !== '?') {
 	  // then include it in the menu
-	  $dialog->choice_add($connection, $item->text());
+	  $l = $links->getLinkFromTags($thing_id, $connection);
+	  if ($l !== null) {
+	    if ($l->predicate() === PREDICATE_LINKS) {
+	      $pred_text = '- ';
+	    } elseif ($l->predicate() === PREDICATE_AKA_OF) {
+	      $pred_text = '* ';
+	      $akas_text .= $connection . ', ';
+	    } else {
+	      // Shouldn't get here
+	      $pred_text = '!!';
+	    }
+	    $dialog->choice_add($connection, $pred_text . $item->text());
+	  }
 	}
       }
     }
     $n++;
+  }
+  if (strlen($akas_text) > 0) {
+    $akas_text = ' aka:[' . substr($akas_text, 0, -2) . '] ';
   }
   $dialog->choice_add('?', 'Top Level');
 } else {
@@ -114,6 +113,7 @@ if (sizeof($connections) !== 0) {
 }
 // Add menu items common to all Things
 $dialog->choice_add('/', 'Add thing');
+$dialog->choice_add('{', 'Add AKA');
 $dialog->choice_add('.', 'Edit thing');
 $dialog->choice_add(';', 'Connect as AKA');
 $dialog->choice_add('RV', 'View reviews');
@@ -121,12 +121,18 @@ $dialog->choice_add('RA', 'Add review');
 $dialog->choice_add('RM', 'Mark reviewed');
 $dialog->choice_add('S', 'Search');
 $dialog->choice_add('[', 'Edit nuance');
-$dialog->choice_add('>', 'Break link to (' . $were_looking_at_tag . ') ' .
-		    $were_looking_at_name);
+$last = $things->getThingFromTag($were_looking_at_tag);
+if ($last !== null) {
+  $dialog->choice_add(']', 'Make this an AKA of "' .
+		      $last->getTextAndNuance() . '" (' .
+		      $were_looking_at_tag . ')');
+  $dialog->choice_add('>', 'Break link to (' . $were_looking_at_tag . ') ' .
+		      $were_looking_at_name);
+}
 
 // now show the dialog
 $dialog->title = $thing_type . ' #' . $thing_id;
-$dialog->menu = $thing_text;
+$dialog->menu = $thing_text . $akas_text;
 $dialog->show_cancel = false;
 $output = $dialog->show();
 

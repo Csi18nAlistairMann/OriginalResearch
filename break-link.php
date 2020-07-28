@@ -28,9 +28,9 @@ $links = new links($projname);
 $links->load();
 $connections = array();
 foreach($links->db as $item) {
-  if (!(($item->from() === $arg_from && $item->to() === $arg_to)
+  if (!(($item->subject() === $arg_from && $item->object() === $arg_to)
 	||
-	($item->to() === $arg_from && $item->from() === $arg_to))) {
+	($item->object() === $arg_from && $item->subject() === $arg_to))) {
     $connections[] = $item;
   }
 }
