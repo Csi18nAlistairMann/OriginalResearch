@@ -5,7 +5,7 @@
 
   Scrape names/twitter links from a manual copy of the hive.one website
 
-  1. Visit hive.one/bitcoin
+  1. Visit hive.one/bitcoin and go Full Screen
   2. Page down to bottom so we see 500, not 50
   3. Ctrl-a | Ctrl-C
   4. Place in source file ./scrapes/hive.one.input
@@ -65,7 +65,7 @@ while(strlen($source) > 0) {
     shell_exec("php api/thing_add.php \"$projname\" \"$ttr_thing_type\" " .
 	       "\"$ttr_thing_tag\" \"$ttr_thing_ts\" " .
 	       "\"$ttr_thing_uploader\" \"$ttr_thing_name\" " .
-	       "\"$ttr_thing_nuance\"");
+	       "\"$ttr_thing_nuance\" \"dupes-not-ok\"");
     $things->load();
     shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php " .
 	       "\"$projname\" \"$ttr_thing_tag\"");

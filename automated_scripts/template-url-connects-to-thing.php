@@ -77,7 +77,7 @@ if ($rv === 0) {
     $thing_tag = $things->getNewTag($thing_name);
     shell_exec("php api/thing_add.php \"$projname\" \"$thing_type\" " .
 	       "\"$thing_tag\" \"$thing_ts\" \"$thing_uploader\" " .
-	       "\"$thing_name\" \"$thing_nuance\"");
+	       "\"$thing_name\" \"$thing_nuance\" \"dupes-not-ok\"");
     $thingtag = $thing_tag;
   }
 

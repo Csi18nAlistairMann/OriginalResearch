@@ -35,7 +35,7 @@ class thing
   function getTextAndNuance() {
     $txt = $this->text();
     $nua = $this->nuance();
-    if ($nua === null)
+    if ($nua === null || $nua === '')
       return $txt;
     else
       return $txt . ' (NB:' . $nua . ')' ;
@@ -194,6 +194,11 @@ class things
       return true;
     }
     return false;
+  }
+
+  function add($new) {
+    $this->db[] = $new;
+    return true;
   }
 }
 

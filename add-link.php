@@ -73,8 +73,8 @@ $crib[] = array($n, $search_phrase, 0, $ASNEW);
 $n++;
 if (sizeof($exact_arr)) {
   foreach($exact_arr as $item) {
-    $dialog_found->choice_add($n, $item->text() . ' (' . $item->tag() .
-			      ') already present');
+    $dialog_found->choice_add($n, $item->getTextAndNuance() . ' (' .
+			      $item->tag() . ') already present');
     $crib[] = array($n, $item->text(), $item->tag(), $ALREADYPRESENT);
     $n++;
   }
@@ -82,8 +82,8 @@ if (sizeof($exact_arr)) {
 
 if (sizeof($found_arr)) {
   foreach($found_arr as $item) {
-    $dialog_found->choice_add($n, $item->text() . ' (' . $item->tag() .
-			      ') link to old');
+    $dialog_found->choice_add($n, $item->getTextAndNuance() . ' (' .
+			      $item->tag() . ') link to old');
     $crib[] = array($n, $item->text(), $item->tag(), $LINKTOOLD);
     $n++;
   }
@@ -130,7 +130,7 @@ if (sizeof($chosen) !== 1) {
     $thing_tag = $things->getNewTag($thing_name);
     shell_exec("php api/thing_add.php \"$projname\" \"$thing_type\" " .
 	       "\"$thing_tag\" \"$thing_ts\" \"$thing_uploader\" " .
-	       "\"$thing_name\" \"$thing_nuance\"");
+	       "\"$thing_name\" \"$thing_nuance\" \"dupes-ok\"");
     shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php " .
 	       "\"$projname\" \"$thing_tag\"");
     $things->load();

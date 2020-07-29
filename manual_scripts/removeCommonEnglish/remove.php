@@ -127,14 +127,18 @@ for($a = 0; $a < strlen($source1); $a++) {
 }
 
 // Merge the three skip lists into one, and clean
+$found = false;
 if ($or_paf !== '') {
   $or_skiplist = strtolower(file_get_contents($or_paf));
-  // the first line of the OR skiplist defines the delimiter used throughout
-  $or_skiplist_delim = trim(substr($or_skiplist, 0, strpos($or_skiplist, "\n")));
-  $or_skiplist = str_replace("’", "'", $or_skiplist);
-  $or_skiplist_arr = explode($or_skiplist_delim, $or_skiplist);
-
-} else {
+  if (strlen($or_skiplist) > 0) {
+    $found = true;
+    // the first line of the OR skiplist defines the delimiter used throughout
+    $or_skiplist_delim = trim(substr($or_skiplist, 0, strpos($or_skiplist, "\n")));
+    $or_skiplist = str_replace("’", "'", $or_skiplist);
+    $or_skiplist_arr = explode($or_skiplist_delim, $or_skiplist);
+  }
+}
+if ($found === false) {
   $or_skiplist_arr = array();
 }
 $general_skiplist = strtolower(file_get_contents($general_paf));

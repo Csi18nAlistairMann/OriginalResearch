@@ -95,7 +95,8 @@ if (sizeof($connections) !== 0) {
 	      // Shouldn't get here
 	      $pred_text = '!!';
 	    }
-	    $dialog->choice_add($connection, $pred_text . $item->text());
+	    $dialog->choice_add($connection, $pred_text .
+				$item->getTextAndNuance());
 	  }
 	}
       }
@@ -115,7 +116,6 @@ if (sizeof($connections) !== 0) {
 $dialog->choice_add('/', 'Add thing');
 $dialog->choice_add('{', 'Add AKA');
 $dialog->choice_add('.', 'Edit thing');
-$dialog->choice_add(';', 'Connect as AKA');
 $dialog->choice_add('RV', 'View reviews');
 $dialog->choice_add('RA', 'Add review');
 $dialog->choice_add('RM', 'Mark reviewed');

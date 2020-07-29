@@ -13,7 +13,7 @@ $effort = new effort02;
 
 // What we're searching for and what we'll link it to
 $rv = 1;
-if ($argc !== 8) {
+if ($argc !== 9) {
   $effort->err(__FILE__, "expected seven arguments");
 
 } else {
@@ -24,6 +24,12 @@ if ($argc !== 8) {
   $user = $argv[5];
   $text = $argv[6];
   $nuance = $argv[7];
+  $dupes = $argv[8];
+
+  $observing_duplicates = false;
+  if (strtolower($dupes) === 'dupes-ok') {
+    $observing_duplicates = true;
+  }
 
   $things = new things($projname);
   $things->load();
@@ -34,16 +40,21 @@ if ($argc !== 8) {
   $thing->timestamp($ts);
   $thing->user($user);
   $thing->text($text);
-  if ($things->addIfNotDuplicate($thing) === true) {
-    // NOT satisfactory right now as two people with the
-    // same name uploaded by the same person would count
-    // as a duplicate.
-    return($things->save());
+
+  $saveF = false;
+  if ($observing_duplicates === true &&
+      $things->addIfNotDuplicate($thing) === true) {
+    $saveF = true;
   } else {
-    return false;
+    if ($things->add($thing) === true) {
+      $saveF = true;
+    }
   }
+  if ($saveF === true) {
+    return($things->save());
+  }
+  return(false);
 }
 
 return $rv;
-
 ?>
