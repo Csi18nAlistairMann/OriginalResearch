@@ -13,4 +13,6 @@ define("TYPE_TEST_THING", 'test-thing');
 
 define("PREDICATE_LINKS", 0);
 define("PREDICATE_AKA_OF", 1);
+
+define("TWITTER_ROOT", 'https://twitter.com/');
 ?>

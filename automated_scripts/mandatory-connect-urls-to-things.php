@@ -11,10 +11,11 @@
   to each in turn.
  */
 
+require_once('defines.php');
 require_once('classes/effort02_class.php');
 
 $effort = new effort02;
-$cribs = array('https://twitter.com/' => 'Twitter',
+$cribs = array(TWITTER_ROOT => 'Twitter',
 	       'https://www.swanbitcoin.com/' => 'Swan Bitcoin',
 	       'https://www.reddit.com/' => 'Reddit',
 	       'https://about.me/' => 'AboutMe',
