@@ -15,6 +15,7 @@ class dialog
   public $choices = '';
   public $crwrap = '';
   public $debug = '';
+  public $defaultno = '';
   public $edit = '';
   public $input = '';
   public $input_init = '';
@@ -23,6 +24,7 @@ class dialog
   public $show_cancel = true;
   public $sizes = MENU_SZ_LONG;
   public $title = '';
+  public $yesno = '';
 
   function escape($val) {
     $escaped = str_replace("'", "'\''", $val);
@@ -30,13 +32,19 @@ class dialog
   }
 
   function show(){
+    $return_status = false;
     $cmd = '';
+    // Common options
     if ($this->crwrap !== '')
       $cmd .= "--cr-wrap ";
+
+    if ($this->defaultno !== '')
+      $cmd .= "--defaultno ";
 
     if ($this->title !== '')
       $cmd .= "--title ' " . $this->escape($this->title) . " ' ";
 
+    // Different types of dialog
     if ($this->input !== '') {
       $cmd .= "--inputbox '" . $this->escape($this->input) . "' " .
 	$this->escape($this->sizes) . " ";
@@ -58,6 +66,11 @@ class dialog
     } elseif ($this->msg !== '') {
       $cmd .= "--msgbox '" . $this->escape($this->msg) . "' " .
 	$this->escape($this->sizes);
+
+    } elseif ($this->yesno !== '') {
+      $return_status = true;
+      $cmd .= "--yesno '" . $this->escape($this->yesno) . "' " .
+	$this->escape($this->sizes);
     }
 
     if ($this->debug === true) {
@@ -66,7 +79,7 @@ class dialog
       exit;
     }
 
-    return $this->show_dialog($cmd);
+    return $this->show_dialog($cmd, $return_status);
   }
 
   function choice_add($tag, $text) {
@@ -86,8 +99,8 @@ class dialog
   }
 
   // https://stackoverflow.com/questions/4711904/using-linux-dialog-command-from-php
-  // https://invisible-island.net/dialog/manpage/dialog.txthttps://invisible-island.net/dialog/manpage/dialog.txt
-  function show_dialog ($args) {
+  // https://invisible-island.net/dialog/manpage/dialog.txt
+  function show_dialog ($args, $return_status) {
     $pipes = array (NULL, NULL, NULL);
     // Allow user to interact with dialog
     $in = fopen ('php://stdin', 'r');
@@ -104,9 +117,11 @@ class dialog
     fclose ($pipes[2]);
     fclose ($out);
     fclose ($in);
-    proc_close ($p);
-    // Return result
-    return $result;
+    $status = proc_close ($p);
+    if ($return_status === false)
+      return $result;
+    else
+      return $status;
   }
 }
 ?>

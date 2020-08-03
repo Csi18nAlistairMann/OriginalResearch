@@ -129,6 +129,7 @@ if ($last !== null) {
   $dialog->choice_add('>', 'Break link to (' . $were_looking_at_tag . ') ' .
 		      $were_looking_at_name);
 }
+$dialog->choice_add('-', 'Delete this thing');
 
 // now show the dialog
 $dialog->title = $thing_type . ' #' . $thing_id;
