@@ -52,7 +52,7 @@ while(strlen($source) > 0) {
     explode("\n", $source, 8);
   $name = trim(convert_to_normal_text($person));
 
-  $twitter_url = 'https://twitter.com/' . trim(trim($handle), '@');
+  $twitter_url = TWITTER_ROOT . trim(trim($handle), '@');
   $ttr_existing_tag = $things->getTagFor($twitter_url);
   if ($ttr_existing_tag === false) {
     $ttr_thing_type = TYPE_TEST_THING;
