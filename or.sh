@@ -28,14 +28,14 @@ fi
 
 #
 # Main loop
-ARG='?';
+ARG='?'
 while [ 1 -eq 1 ]; do
     # Flip between Things to show until a menu item
     # is requested
     while [ "$ARG" != '/' ] && [ "$ARG" != '.' ] && [ "$ARG" != '>' ] && \
 	[ "$ARG" != 'RV' ] && [ "$ARG" != 'RA' ] && [ "$ARG" != 'RM' ] && \
 	[ "$ARG" != 'S' ] && [ "$ARG" != '[' ] && [ "$ARG" != ']' ] && \
-	[ "$ARG" != '{' ]; do
+	[ "$ARG" != '{' ] && [ "$ARG" != '-' ]; do
 	php show-thing.php "$PROJNAME" $ARG
 	ARG=$(cat $WAT_DO_NEXT)
     done;
@@ -82,7 +82,10 @@ while [ 1 -eq 1 ]; do
 	SUBJECT=$(cat $BREAK_LINK_TO);
 	OBJECT=$(cat $BREAK_LINK_FROM);
 	php connect-as-aka.php "$PROJNAME" $SUBJECT $OBJECT
-    fi;
+
+    elif [ "$ARG" = '-' ]; then
+	php delete-thing.php "$PROJNAME" $ONSHOW
+    fi
 
     ARG=$(cat $WAT_DO_NEXT)
 done;
