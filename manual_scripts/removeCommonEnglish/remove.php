@@ -40,6 +40,41 @@ function sortByLength($a, $b){
   return strlen($b) - strlen($a);
 }
 
+// Given a head (such as 'https://' copy all text following it into an array.
+// If the character before is one of the quote marks, stop copying at the next
+// appearance of that quote mark; otherwise at first char(0) to
+// char(32) (space)
+function findURLs($source, $protocol_head) {
+  $urls_arr = array();
+  $pos = 0;
+  while($pos !== false) {
+    $pos = strpos($source, $protocol_head, $pos);
+    if ($pos !== false) {
+      $bookend_char = substr($source, $pos - 1, 1);
+      if ($bookend_char !== '’' && $bookend_char !== '"' &&
+	  $bookend_char !== "'") {
+	$bookend_char = ' ';
+      }
+      $endpos = strpos($source, $bookend_char, $pos);
+      if ($endpos === false)
+	$endpos = strlen($source) - $pos;
+      $candidate = substr($source, $pos, $endpos - $pos);
+      $endpos = 0;
+      for($endpos = 0; $endpos < strlen($candidate); $endpos++) {
+	if (ord($candidate[$endpos]) <= 32) {
+	  break;
+	}
+      }
+      if ($endpos !== strlen($candidate))
+	$candidate = substr($candidate, 0, $endpos);
+      $urls_arr[] = $candidate;
+      $found = true;
+      $pos++;
+    }
+  }
+  return $urls_arr;
+}
+
 // default paths and files
 $general_paf = '';
 $or_paf = '';
@@ -83,8 +118,7 @@ if (!file_exists($or_paf)) {
   $or_paf = '';
 }
 if (!file_exists($source_paf)) {
-  // Bookending with space here and below makes string replacement easier
-  $source1 = ' ' . trim(strtolower(stream_get_contents(STDIN))) . ' ';
+  $source1 = stream_get_contents(STDIN);
   if ($source1 === FALSE) {
     exit("Unable to get STDIN\n");
   }
@@ -93,10 +127,19 @@ if (!file_exists($source_paf)) {
   }
 
 } else {
-  $source1 = ' ' . trim(strtolower(file_get_contents($source_paf))) . ' ';
+  $source1 = file_get_contents($source_paf);
 }
 
+// Extract URLs before processing source
+$urls_arr1 = findURLs($source1, 'https://');
+$source1 = str_replace($urls_arr1, '', $source1);
+$urls_arr2 = findURLs($source1, 'http://');
+$source1 = str_replace($urls_arr2, '', $source1);
+$urls_arr = array_merge($urls_arr1, $urls_arr2);
+
 // Clean the source
+// Bookending with space here and below makes string replacement easier
+$source1 = ' ' . trim(strtolower($source1)) . ' ';
 $source1 = str_replace("’", "'", $source1);
 $source2 = '';
 for($a = 0; $a < strlen($source1); $a++) {
@@ -151,9 +194,9 @@ usort($skiplist_arr, 'sortByLength');
 $skiplist_arr = array_unique($skiplist_arr);
 
 //
-// Remove from $source1 anything that appears in the skiplist. That is already
-// ordered by descending length such that we won't remove "super" before
-// removing "superman"
+// Remove from source and urls anything that appears in the skiplist. That is
+// already ordered by descending length such that we won't remove "super"
+// before removing "superman"
 foreach($skiplist_arr as $string) {
   $string = trim($string);
   if (strlen($string) > 0) {
@@ -162,6 +205,12 @@ foreach($skiplist_arr as $string) {
       // Loop because PHP seems to leave one of a run of identical matches
       // behind
       $source2 = str_ireplace(" $string ", ' ', $source2, $found);
+    }
+  }
+  for($u = 0; $u < sizeof($urls_arr); $u++) {
+    if ($urls_arr[$u] === $string) {
+      array_splice($urls_arr, $u, 1);
+      $u--;
     }
   }
 }
@@ -198,7 +247,8 @@ foreach($source_arr3 as $sword) {
 //
 // Finally, remove duplicates and sort what's left before relaying it back to
 // the user.
-$output_arr2 = array_unique($output_arr);
+$output_arr2 = array_merge($urls_arr, $output_arr);
+$output_arr2 = array_unique($output_arr2);
 sort($output_arr2);
 foreach($output_arr2 as $word) {
   print_r($word . "\n");
