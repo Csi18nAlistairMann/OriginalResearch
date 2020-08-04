@@ -40,7 +40,13 @@ $things = new things($projname);
 $things->load();
 $p = array();
 foreach($things->db as $thing) {
-  $p[] = strtolower($thing->text());
+  if (substr($thing->text(), 0, strlen('https://')) === 'https://'
+      ||
+      substr($thing->text(), 0, strlen('http://')) === 'http://') {
+    $p[] = $thing->text();
+  } else {
+    $p[] = strtolower($thing->text());
+  }
 }
 
 // now order the entries by length: otherwise shorter

@@ -184,14 +184,23 @@ if ($or_paf !== '') {
 if ($found === false) {
   $or_skiplist_arr = array();
 }
-$general_skiplist = strtolower(file_get_contents($general_paf));
+$general_skiplist = file_get_contents($general_paf) ;
 $general_skiplist = str_replace("’", "'", $general_skiplist);
-$personal_skiplist = strtolower(file_get_contents($personal_paf));
+$personal_skiplist = file_get_contents($personal_paf) ;
 $personal_skiplist = str_replace("’", "'", $personal_skiplist);
 $skiplist_arr = explode("\n", $general_skiplist . "\n" . $personal_skiplist);
 $skiplist_arr = array_merge($skiplist_arr, $or_skiplist_arr);
 usort($skiplist_arr, 'sortByLength');
-$skiplist_arr = array_unique($skiplist_arr);
+$skiplist_arr = array_values(array_unique($skiplist_arr));
+
+// Make lower case anything not a url
+for($s = 0; $s < sizeof($skiplist_arr); $s++) {
+  if (substr($skiplist_arr[$s], 0, strlen('https://')) !== 'https://'
+      &&
+      substr($skiplist_arr[$s], 0, strlen('http://')) !== 'http://') {
+    $skiplist_arr[$s] = strtolower($skiplist_arr[$s]);
+  }
+}
 
 //
 // Remove from source and urls anything that appears in the skiplist. That is
@@ -228,6 +237,8 @@ $source_arr3 = explode("@@@", $source3);
 $output_arr = array();
 $count = 0;
 foreach($source_arr3 as $sword) {
+  // Keep the original source word to make it easier to track down
+  $osword = $sword;
   // Remove punctuation
   $sword = trim(strtolower($sword), "\t\n\r\0\x0B\.\,\;\:\!\?\'\(\)\/");
   // If what's left contains at least one letter a-z (so excludes, for example,
@@ -240,7 +251,7 @@ foreach($source_arr3 as $sword) {
     }
   }
   if ($found === true) {
-    $output_arr[] = $sword;
+    $output_arr[] = $osword;
   }
 }
 
