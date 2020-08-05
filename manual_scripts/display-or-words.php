@@ -16,6 +16,8 @@
 // identify it.
 define("DIVIDER", "---abc123---\n");
 
+mb_internal_encoding("UTF-8");
+
 require_once('classes/things_class.php');
 require_once('classes/effort02_class.php');
 
@@ -32,7 +34,7 @@ if ($argc !== 2) {
   exit;
 
 } else {
-  $projname = $argv[1];
+  $projname = escapeshellarg($argv[1]);
 }
 
 // Get the entries: we want the text in lower case
@@ -40,9 +42,9 @@ $things = new things($projname);
 $things->load();
 $p = array();
 foreach($things->db as $thing) {
-  if (substr($thing->text(), 0, strlen('https://')) === 'https://'
+  if (mb_substr($thing->text(), 0, mb_strlen('https://')) === 'https://'
       ||
-      substr($thing->text(), 0, strlen('http://')) === 'http://') {
+      mb_substr($thing->text(), 0, mb_strlen('http://')) === 'http://') {
     $p[] = $thing->text();
   } else {
     $p[] = strtolower($thing->text());

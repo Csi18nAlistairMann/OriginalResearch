@@ -6,6 +6,8 @@
   Entry point for CLI calls to add a simple Review
  */
 
+mb_internal_encoding("UTF-8");
+
 require_once('classes/effort02_class.php');
 require_once('classes/reviews_class.php');
 
@@ -17,7 +19,7 @@ if ($argc !== 6) {
   $effort->err(__FILE__, "expected five arguments");
 
 } else {
-  $projname = $argv[1];
+  $projname = escapeshellarg($argv[1]);
   $ts = $argv[2];
   $user = $argv[3];
   $text = $argv[4];

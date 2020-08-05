@@ -6,6 +6,8 @@
   The user wants to add a review with description
 */
 
+mb_internal_encoding("UTF-8");
+
 require_once('defines.php');
 require_once('classes/dialog_common.php');
 require_once('classes/reviews_class.php');
@@ -19,22 +21,23 @@ if ($argc !== 4) {
   $effort->file(__FILE__, "expected three arguments");
 
 } else {
-  $projname = $argv[1];
+  $projname = escapeshellarg($argv[1]);
   $tempfile = $argv[2];
   $record_to_show = $argv[3];
+  $esc_record_to_show = escapeshellarg($record_to_show);
 }
 
-$uploader = STANDARD_USER;
-$review_ts = strval(date(TIMESTAMP_FORMAT));
+$uploader = escapeshellarg(STANDARD_USER);
+$review_ts = escapeshellarg(strval(date(TIMESTAMP_FORMAT)));
 
 // Get the review from the user
 $dialog->sizes_change(MENU_SZ_SHORT);
 $dialog->edit = $tempfile;
-$review_text = trim($dialog->show());
+$review_text = escapeshellarg(trim($dialog->show()));
 
 if ($review_text !== '') {
-  shell_exec("php api/review_add.php \"$projname\" \"$review_ts\" " .
-	     "\"$uploader\" \"$review_text\" \"$record_to_show\"");
+  shell_exec("php api/review_add.php $projname $review_ts " .
+	     "$uploader $review_text $esc_record_to_show");
 }
 $effort->whatToShowNext($record_to_show);
 ?>

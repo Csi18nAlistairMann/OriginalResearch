@@ -73,7 +73,7 @@ class thing
    */
   function textIs($phrase, $things, $links) {
     $rv = array();
-    if ($phrase === strtolower($this->text())) {
+    if ($phrase === mb_strtolower($this->text())) {
       $rv[] = $this;
     }
     return $rv;
@@ -84,7 +84,7 @@ class thing
     foreach($links_db as $link_tag) {
       $aka = $things->getThingFromTag($link_tag);
 
-      if ($phrase === strtolower($aka->text())) {
+      if ($phrase === mb_strtolower($aka->text())) {
 	$rv[] = $this;
       }
     }
@@ -92,7 +92,7 @@ class thing
   }
 
   function textStrPos($phrase) {
-    $pos = strpos(strtolower($this->text()), $phrase);
+    $pos = mb_strpos(mb_strtolower($this->text()), $phrase);
     if ($pos !== false) {
       return array($this);
     }
@@ -106,6 +106,7 @@ class things
   public $db;
 
   function things($projname) {
+    $projname = mb_substr($projname, 1, mb_strlen($projname) - 2);
     $this->db_file = './data/' . $projname . '/db/things.serialised';
   }
 
@@ -141,7 +142,7 @@ class things
   function getTagFor($text, $lower = false) {
     if ($lower === true) {
       foreach($this->db as $thing) {
-	if (strtolower($thing->text()) === $text) {
+	if (mb_strtolower($thing->text()) === $text) {
 	  return $thing->tag();
 	}
       }
@@ -170,12 +171,19 @@ class things
   // Also exclude website prefixes
   function getNewTag($text) {
     $s = str_replace(' ', '', $text);
-    if (strpos($s, 'https://www.') === 0) {
-      $s = substr($s, 12, 3);
-    } elseif (strpos($s, 'https://') === 0) {
-      $s = substr($s, 8, 3);
+    if (mb_strpos($s, 'https://www.') === 0) {
+      $s = mb_substr($s, 12, 3);
+    } elseif (mb_strpos($s, 'https://') === 0) {
+      $s = mb_substr($s, 8, 3);
     } else {
-      $s = substr($s, 0, 3);
+      $index = -1;
+      do {
+	$index++;
+      } while ($index < mb_strlen($s)
+	       &&
+	       ($s[$index] === "'" || $s[$index] === '"')
+	       );
+      $s = mb_substr($s, $index, 3);
     }
     $s .= dechex(sizeof($this->db) + 1);
     return $s;

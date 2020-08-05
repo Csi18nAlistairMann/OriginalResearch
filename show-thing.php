@@ -6,6 +6,8 @@
   Call up a Thing and display it, along with such menus as required
  */
 
+mb_internal_encoding("UTF-8");
+
 require_once('defines.php');
 require_once('classes/dialog_common.php');
 require_once('classes/things_class.php');
@@ -21,7 +23,7 @@ if ($argc !== 3) {
   $record_to_show = 0;
 
 } else {
-  $projname = $argv[1];
+  $projname = escapeshellarg($argv[1]);
   $record_to_show = $argv[2];
 }
 
@@ -103,8 +105,8 @@ if (sizeof($connections) !== 0) {
     }
     $n++;
   }
-  if (strlen($akas_text) > 0) {
-    $akas_text = ' aka:[' . substr($akas_text, 0, -2) . '] ';
+  if (mb_strlen($akas_text) > 0) {
+    $akas_text = ' aka:[' . mb_substr($akas_text, 0, -2) . '] ';
   }
   $dialog->choice_add('?', 'Top Level');
 } else {

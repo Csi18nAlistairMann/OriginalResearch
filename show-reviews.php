@@ -6,6 +6,8 @@
   Given a particular tag, display all the reviews associated with it.
 */
 
+mb_internal_encoding("UTF-8");
+
 require_once('defines.php');
 require_once('classes/dialog_common.php');
 require_once('classes/reviews_class.php');
@@ -20,7 +22,7 @@ if ($argc !== 3) {
   $effort->err(__FILE__, "expected two arguments");
 
 } else {
-  $projname = $argv[1];
+  $projname = escapeshellarg($argv[1]);
   $record_to_show = $argv[2];
 }
 

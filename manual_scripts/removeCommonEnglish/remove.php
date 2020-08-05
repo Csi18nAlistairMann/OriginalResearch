@@ -35,38 +35,71 @@
 // cat /tmp/email | php remove.php -g uk-us-english-2011 --or-words \
 // "/tmp/or-words" --personal-words my-words
 
+mb_internal_encoding("UTF-8");
+
 // https://stackoverflow.com/questions/838227/php-sort-an-array-by-the-length-of-its-values
 function sortByLength($a, $b){
-  return strlen($b) - strlen($a);
+  return mb_strlen($b) - mb_strlen($a);
 }
 
-// Given a head (such as 'https://' copy all text following it into an array.
-// If the character before is one of the quote marks, stop copying at the next
-// appearance of that quote mark; otherwise at first char(0) to
-// char(32) (space)
+// Fake use of mb_ord
+// https://www.php.net/manual/en/function.ord.php
+function ordutf8($string, &$offset) {
+  $code = ord(substr($string, $offset,1));
+  if ($code >= 128) {        //otherwise 0xxxxxxx
+    if ($code < 224) $bytesnumber = 2;                //110xxxxx
+    else if ($code < 240) $bytesnumber = 3;        //1110xxxx
+    else if ($code < 248) $bytesnumber = 4;    //11110xxx
+    $codetemp = $code - 192 - ($bytesnumber > 2 ? 32 : 0) - ($bytesnumber > 3 ? 16 : 0);
+    for ($i = 2; $i <= $bytesnumber; $i++) {
+      $offset ++;
+      $code2 = ord(substr($string, $offset, 1)) - 128;        //10xxxxxx
+      $codetemp = $codetemp*64 + $code2;
+    }
+    $code = $codetemp;
+  }
+  $offset += 1;
+  if ($offset >= strlen($string)) $offset = -1;
+  return $code;
+}
+
+// findURLs for when don't have mb_ord
 function findURLs($source, $protocol_head) {
   $urls_arr = array();
   $pos = 0;
   while($pos !== false) {
-    $pos = strpos($source, $protocol_head, $pos);
+    // Find the next occurence of https://
+    $pos = mb_strpos($source, $protocol_head, $pos);
     if ($pos !== false) {
-      $bookend_char = substr($source, $pos - 1, 1);
+      // If found
+
+      // Find the next occurence of the bookend character, usually a space
+      $bookend_char = mb_substr($source, $pos - 1, 1);
       if ($bookend_char !== '’' && $bookend_char !== '"' &&
 	  $bookend_char !== "'") {
 	$bookend_char = ' ';
       }
-      $endpos = strpos($source, $bookend_char, $pos);
+      $endpos = mb_strpos($source, $bookend_char, $pos);
+
+      // If no bookend character, assume URL continues to end
       if ($endpos === false)
-	$endpos = strlen($source) - $pos;
-      $candidate = substr($source, $pos, $endpos - $pos);
-      $endpos = 0;
-      for($endpos = 0; $endpos < strlen($candidate); $endpos++) {
-	if (ord($candidate[$endpos]) <= 32) {
+	$endpos = mb_strlen($source) - $pos;
+
+      // Retrieve what we think is the URL
+      $candidate = mb_substr($source, $pos, $endpos - $pos);
+
+      // If a codepoint below ASCII 32 (space) or below exists, that's the end
+      for($endpos = 0; $endpos < mb_strlen($candidate);) {
+	$prev_endpos = $endpos;
+	$cp = ordutf8($candidate, $endpos);
+	if ($cp <= 32) {
 	  break;
 	}
       }
-      if ($endpos !== strlen($candidate))
-	$candidate = substr($candidate, 0, $endpos);
+      if ($endpos < strlen($candidate))
+	$candidate = substr($candidate, 0, $prev_endpos);
+
+      // And store that URL
       $urls_arr[] = $candidate;
       $found = true;
       $pos++;
@@ -139,31 +172,46 @@ $urls_arr = array_merge($urls_arr1, $urls_arr2);
 
 // Clean the source
 // Bookending with space here and below makes string replacement easier
-$source1 = ' ' . trim(strtolower($source1)) . ' ';
+$source1 = ' ' . trim(mb_strtolower($source1)) . ' ';
 $source1 = str_replace("’", "'", $source1);
+$source1 = str_replace('“', '"', $source1);
+$source1 = str_replace('”', '"', $source1);
+$source1 = str_replace('‘', '"', $source1);
 $source2 = '';
-for($a = 0; $a < strlen($source1); $a++) {
+for($a = 0; $a < strlen($source1);) {
+  $prev_a = $a;
+  $cp = ordutf8($source1, $a);
+  if ($a === -1)
+    break;
+  $b = $a;
+  $next_cp = ordutf8($source1, $b);
   if (
-      // Allow a-z, A-Z and 0-9
-      (ord($source1[$a]) >= 97 && ord($source1[$a]) <= 122)
+      ($cp > 238 && $cp !== 8212) // Allow unicode with exceptions
       ||
-      (ord($source1[$a]) >= 65 && ord($source1[$a]) <= 90)
+      ($cp >= 97 && $cp <= 122) // Allow ascii
       ||
-      (ord($source1[$a]) >= 48 && ord($source1[$a]) <= 57)
+      ($cp >= 65 && $cp <= 90)
+      ||
+      ($cp >= 48 && $cp <= 57)
       ||
       // Allow full stop if followed by text - eg, an FQDN
-      ($source1[$a] === '.' && ord($source1[$a + 1]) >= 97 &&
-       ord($source1[$a + 1]) <= 122)
+      ($source1[$prev_a] === '.' && $next_cp >= 97 && $next_cp <= 122)
       ||
       // Allow apostrophe only if NOT followed by full stop or space
       // So: allow if possessive, exclude if quote
-      ($source1[$a] === "'" && $source1[$a + 1] !== '.' &&
-       $source1[$a + 1] !== ' ')
+      ($source1[$prev_a] === "'" && $source1[$a] !== '.' &&
+       $source1[$a] !== ' ')
       ||
       // Allow space, '@' for email addresses, and hyphens
-      $source1[$a] === ' ' || $source1[$a] === '@' || $source1[$a] === '-'
+      $source1[$prev_a] === ' ' || $source1[$prev_a] === '@' ||
+      $source1[$prev_a] === '-'
       ) {
-    $source2 .= $source1[$a];
+    if ($a === $prev_a + 1) {
+      $source2 .= $source1[$prev_a];
+    } else {
+      $source2 .= substr($source1, $prev_a, $a - $prev_a);
+    }
+
   } else {
     $source2 .= ' ';
   }
@@ -172,11 +220,12 @@ for($a = 0; $a < strlen($source1); $a++) {
 // Merge the three skip lists into one, and clean
 $found = false;
 if ($or_paf !== '') {
-  $or_skiplist = strtolower(file_get_contents($or_paf));
-  if (strlen($or_skiplist) > 0) {
+  $or_skiplist = mb_strtolower(file_get_contents($or_paf));
+  if (mb_strlen($or_skiplist) > 0) {
     $found = true;
     // the first line of the OR skiplist defines the delimiter used throughout
-    $or_skiplist_delim = trim(substr($or_skiplist, 0, strpos($or_skiplist, "\n")));
+    $or_skiplist_delim = trim(mb_substr($or_skiplist, 0,
+					mb_strpos($or_skiplist, "\n")));
     $or_skiplist = str_replace("’", "'", $or_skiplist);
     $or_skiplist_arr = explode($or_skiplist_delim, $or_skiplist);
   }
@@ -195,10 +244,10 @@ $skiplist_arr = array_values(array_unique($skiplist_arr));
 
 // Make lower case anything not a url
 for($s = 0; $s < sizeof($skiplist_arr); $s++) {
-  if (substr($skiplist_arr[$s], 0, strlen('https://')) !== 'https://'
+  if (mb_substr($skiplist_arr[$s], 0, mb_strlen('https://')) !== 'https://'
       &&
-      substr($skiplist_arr[$s], 0, strlen('http://')) !== 'http://') {
-    $skiplist_arr[$s] = strtolower($skiplist_arr[$s]);
+      mb_substr($skiplist_arr[$s], 0, mb_strlen('http://')) !== 'http://') {
+    $skiplist_arr[$s] = mb_strtolower($skiplist_arr[$s]);
   }
 }
 
@@ -208,7 +257,7 @@ for($s = 0; $s < sizeof($skiplist_arr); $s++) {
 // before removing "superman"
 foreach($skiplist_arr as $string) {
   $string = trim($string);
-  if (strlen($string) > 0) {
+  if (mb_strlen($string) > 0) {
     $found = 1;
     while ($found !== 0) {
       // Loop because PHP seems to leave one of a run of identical matches
@@ -228,7 +277,7 @@ foreach($skiplist_arr as $string) {
 // Now convert what remains of the source into an array, one 'word' per
 // element. We do so by replacing whitespace (space, newline etc) with a single
 // unlikely string, then extract whatever's between occurences of that string.
-$source3 = preg_replace("/\s/", "@@@", $source2);
+$source3 = mb_ereg_replace("\s", "@@@", $source2);
 $source_arr3 = explode("@@@", $source3);
 
 //
@@ -240,17 +289,8 @@ foreach($source_arr3 as $sword) {
   // Keep the original source word to make it easier to track down
   $osword = $sword;
   // Remove punctuation
-  $sword = trim(strtolower($sword), "\t\n\r\0\x0B\.\,\;\:\!\?\'\(\)\/");
-  // If what's left contains at least one letter a-z (so excludes, for example,
-  // phone numbers)
-  $found = false;
-  for($a = 0; $a < strlen($sword); $a++) {
-    if (ord($sword[$a]) >= 97 && ord($sword[$a]) <= 122) {
-      $found = true;
-      break;
-    }
-  }
-  if ($found === true) {
+  $sword = trim(mb_strtolower($sword), "\t\n\r\0\x0B\.\,\;\:\!\?\'\(\)\/");
+  if (mb_strlen($sword) > 0 && !is_numeric($sword)) {
     $output_arr[] = $osword;
   }
 }

@@ -13,7 +13,10 @@ Design
 			    shell_exec() calls to the api)
        - or.sh		    (main entry point)
        - /tmp/effort02/	    Variety files used for transferring state
-
+       - pics/		    Pictures for the manual
+       - scrapes/	    Raw & processed data scraped from sites
+       - gexf/		    Network maps in XML form of node & edges
+       - manual/	    Documentation
 
 or.sh <project name>
 Main entry point for using Original Research. The project name if not
@@ -32,8 +35,6 @@ The db directory contains continuing state: a number of flat files
 that contained serialised objects. These are used instead of an SQL
 database at this point.
 
-
-/data/<project>/db/
 - things.serialised
   The Things are entities that we're keeping data about: people,
   podcasts, etc. We also keep data about who uploaded it (only me
@@ -44,10 +45,6 @@ database at this point.
   keep track of when was the last time that a Thing was automatically
   processed, as if it hasn't changed since, there may be no need to
   process it again.
-- akas.serialised
-  A thing may be an alternate name for the same underlying entity:
-  for instance "Del Boy" might turn out to refer to "Derrick Trotter".
-  This file maintains which tags are aka's of another.
 - reviews.serialised
   As we research we might reach our own opinion on something: the
   reviews maintain those notes. We can also leave an empty review
@@ -56,7 +53,8 @@ database at this point.
 - links.serialised
   Two different entities might be linked: for instance Alice appeared
   in a YouTube video. The tags for Alice and the video appear
-  together in this file.
+  together in this file. Data is stored as a triple: subject, predicate and
+  object.
 
 
 /api

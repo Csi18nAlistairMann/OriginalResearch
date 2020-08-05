@@ -9,6 +9,8 @@
   Or create a new thing with it and link that to this Thing
 */
 
+mb_internal_encoding("UTF-8");
+
 require_once('defines.php');
 require_once('classes/dialog_common.php');
 require_once('classes/things_class.php');
@@ -21,12 +23,12 @@ $dialog_found = new dialog;
 
 // What we'll link to
 if ($argc === 3) {
-  $thing_to_add_to = 0;
+  $thing_to_add_to = escapeshellarg(0);
 
 } else {
-  $projname = $argv[1];
-  $thing_to_add_to = $argv[2];
-  $predicate = intval($argv[3]);
+  $projname = escapeshellarg($argv[1]);
+  $thing_to_add_to = escapeshellarg($argv[2]);
+  $predicate = escapeshellarg(intval($argv[3]));
 }
 
 // obtain the name to be searched for/added
@@ -49,10 +51,10 @@ $things = new things($projname);
 $things->load();
 $found_arr = array();
 $exact_arr = array();
-$lsearch_phrase = strtolower($search_phrase);
+$lsearch_phrase = mb_strtolower($search_phrase);
 foreach($things->db as $item) {
   // search on what we want to link to this tag
-  $litem_name = strtolower($item->text());
+  $litem_name = mb_strtolower($item->text());
   if ($litem_name === $lsearch_phrase) {
     $exact_arr[] = $item;
 
@@ -122,17 +124,18 @@ if (sizeof($chosen) !== 1) {
 } else {
   if ($chosen[0][2] === $ASNEW) {
     // if we're adding a new thing do that first
-    $thing_type = TYPE_TEST_THING;
-    $thing_ts = date(TIMESTAMP_FORMAT);
-    $thing_uploader = STANDARD_USER;
-    $thing_name = $chosen[0][1];
-    $thing_nuance = '';
+    $thing_type = escapeshellarg(TYPE_TEST_THING);
+    $thing_ts = escapeshellarg(date(TIMESTAMP_FORMAT));
+    $thing_uploader = escapeshellarg(STANDARD_USER);
+    $thing_name = escapeshellarg($chosen[0][1]);
+    $thing_nuance = escapeshellarg('');
     $thing_tag = $things->getNewTag($thing_name);
-    shell_exec("php api/thing_add.php \"$projname\" \"$thing_type\" " .
-	       "\"$thing_tag\" \"$thing_ts\" \"$thing_uploader\" " .
-	       "\"$thing_name\" \"$thing_nuance\" \"dupes-ok\"");
+    $esc_thing_tag = escapeshellarg($thing_tag);
+    $dupes = escapeshellarg(DUPES_OK);
+    shell_exec("php api/thing_add.php $projname $thing_type $esc_thing_tag " .
+	       "$thing_ts $thing_uploader $thing_name $thing_nuance $dupes");
     shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php " .
-	       "\"$projname\" \"$thing_tag\"");
+	       "$projname $esc_thing_tag");
     $things->load();
 
   } elseif ($chosen[0][3] !== $ALREADYPRESENT &&
@@ -142,6 +145,7 @@ if (sizeof($chosen) !== 1) {
 
   } else {
     $thing_tag = $chosen[0][2];
+    $esc_thing_tag = escapeshellarg($thing_tag);
   }
 
   // link it in
@@ -158,8 +162,8 @@ if (sizeof($chosen) !== 1) {
     }
   }
   if ($found === false) {
-    shell_exec("php api/link_add.php \"$projname\" \"$thing_tag\" " .
-	       $predicate . " \"$thing_to_add_to\"");
+    shell_exec("php api/link_add.php $projname $esc_thing_tag $predicate " .
+	       "$thing_to_add_to");
     $links->load();
   }
 }

@@ -15,4 +15,7 @@ define("PREDICATE_LINKS", 0);
 define("PREDICATE_AKA_OF", 1);
 
 define("TWITTER_ROOT", 'https://twitter.com/');
+
+define("DUPES_OK", 'dupes-ok');
+define("DUPES_NOT_OK", 'dupes-not-ok');
 ?>

@@ -17,6 +17,8 @@
 // argv[1] will contain a pathandfile that contains the arguments to look at,
 // or is "ALL".
 
+mb_internal_encoding("UTF-8");
+
 require_once('defines.php');
 require_once('classes/effort02_class.php');
 require_once('classes/links_class.php');
@@ -34,7 +36,7 @@ if ($argc !== 5) {
 }
 
 $tag_arr = array();
-$projname = $argv[1];
+$projname = escapeshellarg($argv[1]);
 $paf = $argv[2];
 $tagname = $argv[3]; // eg, Twitter
 $urlroot = $argv[4]; // eg, https://twitter.com
@@ -69,15 +71,16 @@ if ($rv === 0) {
   $thingtag = $things->getTagFor($tagname);
   if ($thingtag === false) {
     // Can't find the tag? This is a new database so add it in
-    $thing_type = TYPE_TEST_THING;
-    $thing_ts = date(TIMESTAMP_FORMAT);
-    $thing_uploader = STANDARD_USER;
-    $thing_name = $tagname;
-    $thing_nuance = '';
-    $thing_tag = $things->getNewTag($thing_name);
-    shell_exec("php api/thing_add.php \"$projname\" \"$thing_type\" " .
-	       "\"$thing_tag\" \"$thing_ts\" \"$thing_uploader\" " .
-	       "\"$thing_name\" \"$thing_nuance\" \"dupes-not-ok\"");
+    $thing_type = escapeshellarg(TYPE_TEST_THING);
+    $thing_ts = escapeshellarg(date(TIMESTAMP_FORMAT));
+    $thing_uploader = escapeshellarg(STANDARD_USER);
+    $thing_name = escapeshellarg($tagname);
+    $thing_nuance = escapeshellarg('');
+    $thing_tag = escapeshellarg($things->getNewTag($thing_name));
+    $dupes = escapeshellarg(DUPES_NOT_OK);
+    shell_exec("php api/thing_add.php $projname $thing_type " .
+	       "$thing_tag $thing_ts $thing_uploader " .
+	       "$thing_name $thing_nuance $dupes");
     $thingtag = $thing_tag;
   }
 
@@ -96,7 +99,7 @@ if ($rv === 0) {
       if ($tag_last_checked === null ||
 	  $tag_last_checked <= $thing->timestamp()) {;
 	$automated_cribs->setTagLastChecked($tag, $thing->timestamp());
-	if (strpos($thing->text(), $urlroot) !== false) {
+	if (mb_strpos($thing->text(), $urlroot) !== false) {
 	  if ($links->linkTags($tag, PREDICATE_LINKS, $thingtag) == 0)
 	    $changes++;
 	}
