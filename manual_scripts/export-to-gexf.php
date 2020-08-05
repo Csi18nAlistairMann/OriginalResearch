@@ -6,6 +6,8 @@
   Dump the database in a form gephi will accept
 */
 
+mb_internal_encoding("UTF-8");
+
 require_once('defines.php');
 require_once('classes/things_class.php');
 require_once('classes/links_class.php');
@@ -34,7 +36,7 @@ if ($argc !== 2) {
   exit;
 
 } else {
-  $projname = $argv[1];
+  $projname = escapeshellarg($argv[1]);
 }
 
 // Get all the Things
@@ -105,35 +107,10 @@ for($t = 0; $t < sizeof($things->db); $t++) {
   }
 }
 
-// Remove orphan Links: their subject or object don't have a match in Things
-debug('4', 'Remove orphan Links');
-for($l = 0; $l < sizeof($links->db); $l++) {
-  $subject = $links->db[$l]->subject();
-  $object = $links->db[$l]->object();
-  $foundSF = false;
-  $foundOF = false;
-  foreach($things->db as $thing) {
-    if ($thing->tag() === $subject) {
-      $foundSF = true;
-    }
-    if ($thing->tag() === $object) {
-      $foundOF = true;
-    }
-    if ($foundSF === true && $foundOF === true) {
-      break;
-    }
-  }
-  if ($foundSF === false || $foundOF === false) {
-    debug('4', 'Discard link ' . print_r($links->db[$l], true));
-    array_splice($links->db, $l, 1);
-    $l--;
-  }
-}
-
 // Now act on exclusions
 debug('5', 'Remove exclusions');
 for($t = 0; $t < sizeof($things->db); $t++) {
-  if (substr($things->db[$t]->text(), 0, strlen(TWITTER_ROOT)) ===
+  if (mb_substr($things->db[$t]->text(), 0, mb_strlen(TWITTER_ROOT)) ===
       TWITTER_ROOT) {
     $identifier = $things->db[$t]->tag();
 
@@ -190,6 +167,42 @@ for($l1 = 0; $l1 < sizeof($links->db); $l1++) {
 	$l2--;
       }
     }
+  }
+}
+
+// Deal with things linking back to themselves
+debug('8', 'Remove self-referring links');
+for($l = 0; $l < sizeof($links->db); $l++) {
+  if ($links->db[$l]->subject() === $links->db[$l]->object()) {
+    debug('8', 'Removing self-referring link ' . print_r($links->db[$l],
+							 true));
+    array_splice($links->db, $l, 1);
+    $l--;
+  }
+}
+
+// Remove orphan Links: their subject or object don't have a match in Things
+debug('9', 'Remove orphan Links');
+for($l = 0; $l < sizeof($links->db); $l++) {
+  $subject = $links->db[$l]->subject();
+  $object = $links->db[$l]->object();
+  $foundSF = false;
+  $foundOF = false;
+  foreach($things->db as $thing) {
+    if ($thing->tag() === $subject) {
+      $foundSF = true;
+    }
+    if ($thing->tag() === $object) {
+      $foundOF = true;
+    }
+    if ($foundSF === true && $foundOF === true) {
+      break;
+    }
+  }
+  if ($foundSF === false || $foundOF === false) {
+    debug('4', 'Discard link ' . print_r($links->db[$l], true));
+    array_splice($links->db, $l, 1);
+    $l--;
   }
 }
 

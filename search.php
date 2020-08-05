@@ -7,6 +7,8 @@
   to him the results of it
 */
 
+mb_internal_encoding("UTF-8");
+
 require_once('defines.php');
 require_once('classes/dialog_common.php');
 require_once('classes/things_class.php');
@@ -25,7 +27,7 @@ if ($argc === 2) {
   $thing_to_search_for = 0;
 
 } else {
-  $projname = $argv[1];
+  $projname = escapeshellarg($argv[1]);
   $thing_to_search_for = $argv[2];
 }
 
@@ -48,7 +50,7 @@ if ($search_phrase === '') {
   $found_arr = array();
   $exact_arr = array();
   $exact_tag_arr = array();
-  $lsearch_phrase = strtolower($search_phrase);
+  $lsearch_phrase = mb_strtolower($search_phrase);
   foreach($things->db as $item) {
     $exact_arr2 = $item->textIs($lsearch_phrase, $things, $links);
     $found_arr2 = $item->textStrPos($lsearch_phrase);
@@ -59,7 +61,7 @@ if ($search_phrase === '') {
     } elseif (sizeof($found_arr2) > 0) {
       $found_arr = array_merge($found_arr, $found_arr2);
     }
-    $tag = strtolower($item->tag());
+    $tag = mb_strtolower($item->tag());
     if ($tag === $lsearch_phrase)
       $exact_tag_arr[] = $item;
   }

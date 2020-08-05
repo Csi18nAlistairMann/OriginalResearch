@@ -11,6 +11,8 @@
   to each in turn.
  */
 
+mb_internal_encoding("UTF-8");
+
 require_once('defines.php');
 require_once('classes/effort02_class.php');
 
@@ -26,22 +28,25 @@ $cribs = array(TWITTER_ROOT => 'Twitter',
 	       );
 
 if ($argc === 2) {
-  $projname = $argv[1];
-  $tag_arg = 'ALL';
+  $projname = escapeshellarg($argv[1]);
+  $tag_arg = escapeshellarg('ALL');
 
 } elseif ($argc === 3) {
-  $projname = $argv[1];
-  $taglist = $argv[2];
+  $projname = escapeshellarg($argv[1]);
+  $taglist = escapeshellarg($argv[2]);
   $temp = tmpfile();
   $tag_arg = stream_get_meta_data($temp)['uri'];
+  $esc_tag_arg = escapeshellarg($tag_arg);
   file_put_contents($tag_arg, $taglist);
-
 } else {
   $effort->err(__FILE__, "expected one or two arguments");
 }
 
 foreach($cribs as $url => $thing) {
-  $output = shell_exec('php automated_scripts/template-url-connects-to-thing.php "' . $projname . '" ' . $tag_arg .  ' "' . $thing . '" "' . $url . '"');
+  $esc_url = escapeshellarg($url);
+  $esc_thing = escapeshellarg($thing);
+  $output = shell_exec("php automated_scripts/template-url-connects-to-thing.php " .
+		       "$projname $esc_tag_arg $esc_thing $esc_url");
 }
 
 ?>

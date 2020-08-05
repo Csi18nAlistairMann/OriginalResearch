@@ -6,6 +6,8 @@
   Given thing N, allow user to edit its name
 */
 
+mb_internal_encoding("UTF-8");
+
 require_once('defines.php');
 require_once('classes/dialog_common.php');
 require_once('classes/things_class.php');
@@ -19,7 +21,7 @@ if ($argc !== 3) {
   $effort->err(__FILE__, "expected three arguments");
 
 } else {
-  $projname = $argv[1];
+  $projname = escapeshellarg($argv[1]);
   $record_to_delete = $argv[2];
 }
 

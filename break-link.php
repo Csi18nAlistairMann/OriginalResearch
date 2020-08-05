@@ -7,6 +7,8 @@
   links database.
 */
 
+mb_internal_encoding("UTF-8");
+
 require_once('defines.php');
 require_once('classes/links_class.php');
 require_once('classes/effort02_class.php');
@@ -19,7 +21,7 @@ if ($argc !== 4) {
   exit;
 
 } else {
-  $projname = $argv[1];
+  $projname = escapeshellarg($argv[1]);
   $arg_from = $argv[2];
   $arg_to = $argv[3];
 }

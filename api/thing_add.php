@@ -6,6 +6,9 @@
   Entry point for CLI calls to add a simple Thing
  */
 
+mb_internal_encoding("UTF-8");
+
+require_once('defines.php');
 require_once('classes/effort02_class.php');
 require_once('classes/things_class.php');
 
@@ -14,10 +17,10 @@ $effort = new effort02;
 // What we're searching for and what we'll link it to
 $rv = 1;
 if ($argc !== 9) {
-  $effort->err(__FILE__, "expected seven arguments");
+  $effort->err(__FILE__, "expected eight arguments");
 
 } else {
-  $projname = $argv[1];
+  $projname = escapeshellarg($argv[1]);
   $type = $argv[2];
   $tag = $argv[3];
   $ts = $argv[4];
@@ -27,7 +30,7 @@ if ($argc !== 9) {
   $dupes = $argv[8];
 
   $observing_duplicates = false;
-  if (strtolower($dupes) === 'dupes-ok') {
+  if (strtolower($dupes) === DUPES_NOT_OK) {
     $observing_duplicates = true;
   }
 

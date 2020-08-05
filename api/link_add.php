@@ -6,6 +6,8 @@
   Entry point for CLI requests to add a simple link
  */
 
+mb_internal_encoding("UTF-8");
+
 require_once('classes/effort02_class.php');
 require_once('classes/links_class.php');
 
@@ -17,7 +19,7 @@ if ($argc !== 5) {
   $effort->err(__FILE__, "expected four arguments");
 
 } else {
-  $projname = $argv[1];
+  $projname = escapeshellarg($argv[1]);
   $subject = $argv[2];
   $predicate = $argv[3];
   $object = $argv[4];

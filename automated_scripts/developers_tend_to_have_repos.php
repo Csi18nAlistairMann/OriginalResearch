@@ -17,6 +17,8 @@
 // argv[1] will contain a pathandfile that contains the arguments to look at,
 // OR is "ALL".
 
+mb_internal_encoding("UTF-8");
+
 require_once('classes/effort02_class.php');
 require_once('classes/links_class.php');
 require_once('classes/things_class.php');
@@ -31,7 +33,7 @@ if ($argc !== 3) {
   exit;
 }
 
-$projname = $argv[1];
+$projname = escapeshellarg($argv[1]);
 $paf = $argv[2];
 
 if ($rv === 0) {

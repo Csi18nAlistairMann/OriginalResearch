@@ -6,6 +6,8 @@
   Dump the database to html
 */
 
+mb_internal_encoding("UTF-8");
+
 require_once('defines.php');
 require_once('classes/things_class.php');
 require_once('classes/links_class.php');
@@ -19,7 +21,7 @@ if ($argc !== 3) {
   exit;
 
 } else {
-  $projname = $argv[1];
+  $projname = escapeshellarg($argv[1]);
   $destdir = $argv[2];
 }
 
