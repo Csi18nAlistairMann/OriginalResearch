@@ -127,13 +127,15 @@ if (sizeof($chosen) !== 1) {
     $thing_type = escapeshellarg(TYPE_TEST_THING);
     $thing_ts = escapeshellarg(date(TIMESTAMP_FORMAT));
     $thing_uploader = escapeshellarg(STANDARD_USER);
-    $thing_name = escapeshellarg($chosen[0][1]);
+    $thing_name = $chosen[0][1];
+    $esc_thing_name = escapeshellarg($thing_name);
     $thing_nuance = escapeshellarg('');
     $thing_tag = $things->getNewTag($thing_name);
     $esc_thing_tag = escapeshellarg($thing_tag);
     $dupes = escapeshellarg(DUPES_OK);
     shell_exec("php api/thing_add.php $projname $thing_type $esc_thing_tag " .
-	       "$thing_ts $thing_uploader $thing_name $thing_nuance $dupes");
+	       "$thing_ts $thing_uploader $esc_thing_name $thing_nuance " .
+	       "$dupes");
     shell_exec("php automated_scripts/mandatory-connect-urls-to-things.php " .
 	       "$projname $esc_thing_tag");
     $things->load();

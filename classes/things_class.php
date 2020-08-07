@@ -171,6 +171,8 @@ class things
   // Also exclude website prefixes
   function getNewTag($text) {
     $s = str_replace(' ', '', $text);
+    $s = str_replace('"', '', $s);
+    $s = str_replace("'", '', $s);
     if (mb_strpos($s, 'https://www.') === 0) {
       $s = mb_substr($s, 12, 3);
     } elseif (mb_strpos($s, 'https://') === 0) {
