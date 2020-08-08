@@ -25,7 +25,8 @@ if ($argc === 3) {
 
 } else {
   $projname = escapeshellarg($argv[1]);
-  $subject = escapeshellarg($argv[2]);
+  $subject = $argv[2];
+  $esc_subject = escapeshellarg($subject);
   $object = $argv[3];
   $esc_object = escapeshellarg($object);
 }
@@ -39,14 +40,14 @@ foreach($links->db as $item) {
   if (($item->subject() === $object && $item->object() === $subject)
       ||
       ($item->object() === $object && $item->subject() === $subject)) {
-    shell_exec("php api/link_edit.php $projname $subject $predicate " .
+    shell_exec("php api/link_edit.php $projname $esc_subject $predicate " .
 	       "$esc_object");
     $found = true;
     break;
   }
 }
 if ($found === false) {
-  shell_exec("php api/link_add.php $projname $subject $predicate " .
+  shell_exec("php api/link_add.php $projname $esc_subject $predicate " .
 	     "$esc_object");
 }
 
