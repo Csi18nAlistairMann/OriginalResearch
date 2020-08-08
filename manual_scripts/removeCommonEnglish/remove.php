@@ -171,8 +171,7 @@ $source1 = str_replace($urls_arr2, '', $source1);
 $urls_arr = array_merge($urls_arr1, $urls_arr2);
 
 // Clean the source
-// Bookending with space here and below makes string replacement easier
-$source1 = ' ' . trim(mb_strtolower($source1)) . ' ';
+$source1 = trim(mb_strtolower($source1));
 $source1 = str_replace("’", "'", $source1);
 $source1 = str_replace('“', '"', $source1);
 $source1 = str_replace('”', '"', $source1);
@@ -216,6 +215,8 @@ for($a = 0; $a < strlen($source1);) {
     $source2 .= ' ';
   }
 }
+// Bookending with space here and below makes string replacement easier
+$source2 = ' ' . $source2 . ' ';
 
 // Merge the three skip lists into one, and clean
 $found = false;
