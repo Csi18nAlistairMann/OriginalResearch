@@ -31,11 +31,21 @@
 // the first line. This allows us to include newlines in entries. Obtain using
 // $ php manual_scripts/display-or-words.php <project name> >/tmp/or-words
 //
+// Note that we don't take a literal reading of what comes in. For instance, a
+// URL https://example.com/INDEX.html would be compared as
+// https    example.com index.html; and "Mr. Smith" as "mr  smith". This could
+// mean "https:!!!examPLE.com@index.HTML" and "MR- SMITH" would be considered
+// matches. This compromise is necessary to be able to handle how spacing
+// works in real use, where a great many ASCII codes (and at least one Unicode
+// codepoint) end words.
+//
 // Example usage:
 // cat /tmp/email | php remove.php -g uk-us-english-2011 --or-words \
 // "/tmp/or-words" --personal-words my-words
 
 mb_internal_encoding("UTF-8");
+
+define("DELIMITER", '@@@');
 
 // https://stackoverflow.com/questions/838227/php-sort-an-array-by-the-length-of-its-values
 function sortByLength($a, $b){
@@ -63,49 +73,60 @@ function ordutf8($string, &$offset) {
   return $code;
 }
 
-// findURLs for when don't have mb_ord
-function findURLs($source, $protocol_head) {
-  $urls_arr = array();
-  $pos = 0;
-  while($pos !== false) {
-    // Find the next occurence of https://
-    $pos = mb_strpos($source, $protocol_head, $pos);
-    if ($pos !== false) {
-      // If found
-
-      // Find the next occurence of the bookend character, usually a space
-      $bookend_char = mb_substr($source, $pos - 1, 1);
-      if ($bookend_char !== '’' && $bookend_char !== '"' &&
-	  $bookend_char !== "'") {
-	$bookend_char = ' ';
+// With a source we've never seen before we are looking to establish where the
+// boundary is between words. That's not always clear: spaces, newline, line
+// feeds, punctuation marks all count. But not always! A full stop doesn't
+// count in a fully qualified domain name, for instance.
+function cleanText($source1) {
+  $source1 = str_replace("\n", DELIMITER, $source1);
+  // Clean the source of word separators
+  $source1 = trim(mb_strtolower($source1));
+  // Add a final space to guarantee we finish with it
+  $source1 .= ' ';
+  $source1 = str_replace("’", "'", $source1);
+  $source1 = str_replace('“', '"', $source1);
+  $source1 = str_replace('”', '"', $source1);
+  $source1 = str_replace('‘', '"', $source1);
+  $source2 = '';
+  for($a = 0; $a < strlen($source1);) {
+    $prev_a = $a;
+    $cp = ordutf8($source1, $a);
+    if ($a === -1)
+      break;
+    $b = $a;
+    $next_cp = ordutf8($source1, $b);
+    if (
+	($cp > 238 && $cp !== 8212) // Allow unicode with exceptions
+	||
+	($cp >= 97 && $cp <= 122) // Allow ascii
+	||
+	($cp >= 65 && $cp <= 90)
+	||
+	($cp >= 48 && $cp <= 57)
+	||
+	// Allow full stop if followed by text - eg, an FQDN
+	($source1[$prev_a] === '.' && $next_cp >= 97 && $next_cp <= 122)
+	||
+	// Allow apostrophe only if NOT followed by full stop or space
+	// So: allow if possessive, exclude if quote
+	($source1[$prev_a] === "'" && $source1[$a] !== '.' &&
+	 $source1[$a] !== ' ')
+	||
+	// Allow space, '@' for email addresses, and hyphens
+	$source1[$prev_a] === ' ' || $source1[$prev_a] === '@' ||
+	$source1[$prev_a] === '-'
+	) {
+      if ($a === $prev_a + 1) {
+	$source2 .= $source1[$prev_a];
+      } else {
+	$source2 .= substr($source1, $prev_a, $a - $prev_a);
       }
-      $endpos = mb_strpos($source, $bookend_char, $pos);
 
-      // If no bookend character, assume URL continues to end
-      if ($endpos === false)
-	$endpos = mb_strlen($source) - $pos;
-
-      // Retrieve what we think is the URL
-      $candidate = mb_substr($source, $pos, $endpos - $pos);
-
-      // If a codepoint below ASCII 32 (space) or below exists, that's the end
-      for($endpos = 0; $endpos < mb_strlen($candidate);) {
-	$prev_endpos = $endpos;
-	$cp = ordutf8($candidate, $endpos);
-	if ($cp <= 32) {
-	  break;
-	}
-      }
-      if ($endpos < strlen($candidate))
-	$candidate = substr($candidate, 0, $prev_endpos);
-
-      // And store that URL
-      $urls_arr[] = $candidate;
-      $found = true;
-      $pos++;
+    } else {
+      $source2 .= ' ';
     }
   }
-  return $urls_arr;
+  return $source2;
 }
 
 // default paths and files
@@ -163,99 +184,46 @@ if (!file_exists($source_paf)) {
   $source1 = file_get_contents($source_paf);
 }
 
-// Extract URLs before processing source
-$urls_arr1 = findURLs($source1, 'https://');
-$source1 = str_replace($urls_arr1, '', $source1);
-$urls_arr2 = findURLs($source1, 'http://');
-$source1 = str_replace($urls_arr2, '', $source1);
-$urls_arr = array_merge($urls_arr1, $urls_arr2);
-
-// Clean the source
-$source1 = trim(mb_strtolower($source1));
-$source1 = str_replace("’", "'", $source1);
-$source1 = str_replace('“', '"', $source1);
-$source1 = str_replace('”', '"', $source1);
-$source1 = str_replace('‘', '"', $source1);
-$source2 = '';
-for($a = 0; $a < strlen($source1);) {
-  $prev_a = $a;
-  $cp = ordutf8($source1, $a);
-  if ($a === -1)
-    break;
-  $b = $a;
-  $next_cp = ordutf8($source1, $b);
-  if (
-      ($cp > 238 && $cp !== 8212) // Allow unicode with exceptions
-      ||
-      ($cp >= 97 && $cp <= 122) // Allow ascii
-      ||
-      ($cp >= 65 && $cp <= 90)
-      ||
-      ($cp >= 48 && $cp <= 57)
-      ||
-      // Allow full stop if followed by text - eg, an FQDN
-      ($source1[$prev_a] === '.' && $next_cp >= 97 && $next_cp <= 122)
-      ||
-      // Allow apostrophe only if NOT followed by full stop or space
-      // So: allow if possessive, exclude if quote
-      ($source1[$prev_a] === "'" && $source1[$a] !== '.' &&
-       $source1[$a] !== ' ')
-      ||
-      // Allow space, '@' for email addresses, and hyphens
-      $source1[$prev_a] === ' ' || $source1[$prev_a] === '@' ||
-      $source1[$prev_a] === '-'
-      ) {
-    if ($a === $prev_a + 1) {
-      $source2 .= $source1[$prev_a];
-    } else {
-      $source2 .= substr($source1, $prev_a, $a - $prev_a);
-    }
-
-  } else {
-    $source2 .= ' ';
-  }
-}
-// Bookending with space here and below makes string replacement easier
-$source2 = ' ' . $source2 . ' ';
+// Draw just the personal dictionary in
+$personal_skiplist = file_get_contents($personal_paf) ;
+$personal_skiplist_arr = explode(DELIMITER, cleanText($personal_skiplist));
+usort($personal_skiplist_arr, 'sortByLength');
 
 // Merge the three skip lists into one, and clean
+// The OR list is treated differently because it starts with and includes
+// delimiters
 $found = false;
 if ($or_paf !== '') {
-  $or_skiplist = mb_strtolower(file_get_contents($or_paf));
+  $or_skiplist = file_get_contents($or_paf);
   if (mb_strlen($or_skiplist) > 0) {
     $found = true;
     // the first line of the OR skiplist defines the delimiter used throughout
     $or_skiplist_delim = trim(mb_substr($or_skiplist, 0,
 					mb_strpos($or_skiplist, "\n")));
-    $or_skiplist = str_replace("’", "'", $or_skiplist);
-    $or_skiplist_arr = explode($or_skiplist_delim, $or_skiplist);
+    $or_skiplist = str_replace("\n", '', $or_skiplist);
   }
 }
 if ($found === false) {
   $or_skiplist_arr = array();
 }
-$general_skiplist = file_get_contents($general_paf) ;
-$general_skiplist = str_replace("’", "'", $general_skiplist);
+// The other two are one word per line
+$general_skiplist = file_get_contents($general_paf);
 $personal_skiplist = file_get_contents($personal_paf) ;
-$personal_skiplist = str_replace("’", "'", $personal_skiplist);
-$skiplist_arr = explode("\n", $general_skiplist . "\n" . $personal_skiplist);
+// The two kinds may have different delimiters
+$or_skiplist_arr = explode($or_skiplist_delim, cleanText($or_skiplist));
+$skiplist_arr = explode(DELIMITER, cleanText($general_skiplist) . DELIMITER .
+			cleanText($personal_skiplist));
+// Merge the two, sort them, resolve duplicates and reindex them
 $skiplist_arr = array_merge($skiplist_arr, $or_skiplist_arr);
 usort($skiplist_arr, 'sortByLength');
 $skiplist_arr = array_values(array_unique($skiplist_arr));
 
-// Make lower case anything not a url
-for($s = 0; $s < sizeof($skiplist_arr); $s++) {
-  if (mb_substr($skiplist_arr[$s], 0, mb_strlen('https://')) !== 'https://'
-      &&
-      mb_substr($skiplist_arr[$s], 0, mb_strlen('http://')) !== 'http://') {
-    $skiplist_arr[$s] = mb_strtolower($skiplist_arr[$s]);
-  }
-}
+// Bookending with space here and below makes string replacement easier
+$source2 = ' ' . cleanText($source1) . ' ';
+$source2 = str_replace(DELIMITER, ' ', $source2);
 
-//
-// Remove from source and urls anything that appears in the skiplist. That is
-// already ordered by descending length such that we won't remove "super"
-// before removing "superman"
+// Should we find a match in the source for anything in the skiplist, replace
+// it with a space
 foreach($skiplist_arr as $string) {
   $string = trim($string);
   if (mb_strlen($string) > 0) {
@@ -266,20 +234,14 @@ foreach($skiplist_arr as $string) {
       $source2 = str_ireplace(" $string ", ' ', $source2, $found);
     }
   }
-  for($u = 0; $u < sizeof($urls_arr); $u++) {
-    if ($urls_arr[$u] === $string) {
-      array_splice($urls_arr, $u, 1);
-      $u--;
-    }
-  }
 }
 
 //
 // Now convert what remains of the source into an array, one 'word' per
 // element. We do so by replacing whitespace (space, newline etc) with a single
 // unlikely string, then extract whatever's between occurences of that string.
-$source3 = mb_ereg_replace("\s", "@@@", $source2);
-$source_arr3 = explode("@@@", $source3);
+$source3 = mb_ereg_replace("\s", DELIMITER, $source2);
+$source_arr3 = explode(DELIMITER, $source3);
 
 //
 // Handle each 'word' in turn, storing for futher processing any word in the
@@ -299,8 +261,7 @@ foreach($source_arr3 as $sword) {
 //
 // Finally, remove duplicates and sort what's left before relaying it back to
 // the user.
-$output_arr2 = array_merge($urls_arr, $output_arr);
-$output_arr2 = array_unique($output_arr2);
+$output_arr2 = array_unique($output_arr);
 sort($output_arr2);
 foreach($output_arr2 as $word) {
   print_r($word . "\n");
