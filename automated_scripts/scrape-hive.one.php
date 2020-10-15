@@ -1,18 +1,26 @@
 <?php
 
 /*
-  scrape-hive.one.php
+  scrape-hive.one.php <database> [<file>]
 
-  Scrape names/twitter links from a manual copy of the hive.one website
+  Scrape names/twitter links from manual copies of the hive.one website.
 
-  1. Visit hive.one/bitcoin and go Full Screen
-  2. Page down to bottom so we see 500, not 50
-  3. Ctrl-a | Ctrl-C
-  4. Place in source file ./scrapes/hive.one.input
-  5. Remove items from start down to but excluding name 1 (Adam Back)
-  6. Remove items from "HIVE" down (short copy) or "End of list" down
-  (long copy)
-  7. Run this script
+  Program assumes you are in the parent directory to this script where the
+  scrapes are stored.
+
+  1. Visit hive.one/bitcoin
+  2. Full Screen
+  3. Page down to bottom so we see 500, not 50
+  4. Ctrl-a | Ctrl-C
+  5. Place in source file ./scrapes/hive.one.input.ddmmmyyy.btc
+  6. Remove items from start down to but excluding name 1 (Adam Back)
+  7. Remove items from "HIVE" down (short copy) or "End of list" down (long
+  copy)
+  8. Run this script eg
+  php ./automated_scripts/scrape-hive.one.php btc \
+   ./scrapes/hive.one.input.01jan1971.btc
+  9. Repeat above for https://hive.one/ethereum
+  10. Repeat above for https://hive.one/crypto (1000, not 500)
 */
 
 mb_internal_encoding("UTF-8");
@@ -23,17 +31,20 @@ require_once('classes/things_class.php');
 require_once('classes/links_class.php');
 
 $effort = new effort02;
-
-$source = file_get_contents('./scrapes/hive.one.input');
+$sourcefile = '';
 
 // Fetch DB being handled
-if ($argc !== 2) {
-  $effort->err(__FILE__, "expected one argument");
+if ($argc > 3) {
+  $effort->err(__FILE__, "expected one or two arguments");
+  var_dump($argc);
   exit;
 
 } else {
   $projname = escapeshellarg($argv[1]);
+  $sourcefile = $argv[2];
 }
+
+$source = file_get_contents($sourcefile);
 
 $things = new things($projname);
 $things->load();
@@ -73,7 +84,7 @@ while(strlen($source) > 0) {
   // Do we already have this guys proper name?
   $people_tag = escapeshellarg($things->getTagFor('People'));
   $existing_name_tag = escapeshellarg($things->getTagFor($name));
-  if ($existing_name_tag === false) {
+  if ($existing_name_tag === "''") {
     // Tag not found.
     print_r("DIY -- Don't have exact match for '$name' - DIY\n");
     // add a thing under this name, and link it in

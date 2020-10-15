@@ -1,5 +1,6 @@
 <?php
 
+require_once('defines.php');
 require_once('classes/links_class.php');
 
 class thing
@@ -107,7 +108,7 @@ class things
 
   function things($projname) {
     $projname = mb_substr($projname, 1, mb_strlen($projname) - 2);
-    $this->db_file = './data/' . $projname . '/db/things.serialised';
+    $this->db_file = DATA_DIR . $projname . '/db/things.serialised';
   }
 
   function load() {

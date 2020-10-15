@@ -11,6 +11,8 @@
   27jun2020 database is currently empty
  */
 
+require_once('defines.php');
+
 class automated_crib
 {
   private $tag = null;
@@ -38,7 +40,7 @@ class automated_cribs
 
   function automated_cribs($projname) {
     $projname = mb_substr($projname, 1, mb_strlen($projname) - 2);
-    $this->db_file = './data/' . $projname . '/db/automated_cribs.serialised';
+    $this->db_file = DATA_DIR . $projname . '/db/automated_cribs.serialised';
   }
 
   function load() {

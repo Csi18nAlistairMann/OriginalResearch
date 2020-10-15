@@ -1,5 +1,7 @@
 <?php
 
+require_once('defines.php');
+
 /*
   review class
 
@@ -58,7 +60,7 @@ class reviews
 
   function reviews($projname) {
     $projname = mb_substr($projname, 1, mb_strlen($projname) - 2);
-    $this->db_file = './data/' . $projname . '/db/reviews.serialised';
+    $this->db_file = DATA_DIR . $projname . '/db/reviews.serialised';
   }
 
   function load() {

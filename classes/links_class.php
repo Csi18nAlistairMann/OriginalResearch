@@ -37,7 +37,7 @@ class links
 
   function links($projname) {
     $projname = mb_substr($projname, 1, mb_strlen($projname) - 2);
-    $this->db_file = './data/' . $projname . '/db/links.serialised';
+    $this->db_file = DATA_DIR . $projname . '/db/links.serialised';
   }
 
   function load() {

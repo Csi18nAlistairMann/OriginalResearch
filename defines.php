@@ -1,5 +1,6 @@
 <?php
 
+define('DATA_DIR', './data/');
 define("TEMP_DIR", '/tmp/effort02');
 define("WERE_LOOKING_AT", TEMP_DIR . '/were_looking_at');
 define("BREAK_LINK_FROM", TEMP_DIR . '/break_link_from');
