@@ -36,7 +36,6 @@ $sourcefile = '';
 // Fetch DB being handled
 if ($argc > 3) {
   $effort->err(__FILE__, "expected one or two arguments");
-  var_dump($argc);
   exit;
 
 } else {
