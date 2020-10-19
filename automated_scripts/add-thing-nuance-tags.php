@@ -111,6 +111,6 @@ foreach($tags_arr as $tag) {
 
 completed:
 if ($msg !== '')
-  printf($msg);
+  echo($msg);
 exit($result);
 ?>

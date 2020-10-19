@@ -70,6 +70,6 @@ foreach($vids_arr as $line) {
 
 completed:
 if ($msg !== '')
-  printf($msg);
+  echo($msg);
 exit($result);
 ?>
