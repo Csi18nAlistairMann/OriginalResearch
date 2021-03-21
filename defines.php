@@ -1,5 +1,15 @@
 <?php
 
+define('OR_DIR', '/home/am/OR/');
+define('ARCHIVE_DIR', '/home/am/OR-archives/');
+define('SCRAPES_DIR', OR_DIR . 'scrapes/');
+define('WBD_DIR', ARCHIVE_DIR . 'what-bitcoin-did/');
+define('SLP_DIR', ARCHIVE_DIR . 'stephanliverapodcast/');
+// The shortest transcript to Episode 219 was 33371 bytes, so assume here that
+// a transcript one tenth that is probably bogus.
+define('MIN_TRANSCRIPT_LEN', 3337);
+define('INSTALL_DIR', '/home/am/development/originalresearch/effort02/');
+
 define('DATA_DIR', './data/');
 define("TEMP_DIR", '/tmp/effort02');
 define("WERE_LOOKING_AT", TEMP_DIR . '/were_looking_at');
@@ -19,4 +29,6 @@ define("TWITTER_ROOT", 'https://twitter.com/');
 
 define("DUPES_OK", 'dupes-ok');
 define("DUPES_NOT_OK", 'dupes-not-ok');
+
+define('ERR_BAD_ARGS_T', 'Bad arguments')
 ?>

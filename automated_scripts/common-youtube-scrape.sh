@@ -16,7 +16,7 @@
 #     load them in until requested. Skip if only needing most recent. Having
 #     browser on full-screen maximises initial population
 #  c. Click SingleFile extension. If reload required, do so, with page down
-#     repeated if used above, and click SingleFile extension again
+#     repeated if used above, and click SingleFile extension once more.
 #  d. It may takes some seconds for a larger page but the html should be
 #     downloaded to your default download location
 #  e. Call this script as above
@@ -52,29 +52,54 @@
 function scrape_to_simple {
     cat "$1" | grep 'watch?v=' | grep '</a>' | sed \
 	"s#.*['\"] href=\"\(https://www.youtube.com/watch?v=.*\)#\1#" | \
-	sed 's\</a>.*\\g' | uniq | LC_ALL=C sort >"$2"
+	sed 's\</a>.*\\g' >"$2"
 }
 
 #
 # iteration constructs and handles particular matches against the scraped html
 function iteration {
-    MATCH=$1
-    TAGS=$2
-    FROM=$3
-    TO=$4
+    EPTAG=$1
+    SUBDIR=$2
+    MATCH=$3
+    TAGS=$4
+    FROM=$5
+    TO=$6
+
+    # Make room in the file system for where we'll record stuff locally
+    mkdir -p $ARCHIVE_DIR$SUBDIR
 
     # Construct data file with tags on the first line and matches from the
     # original file on subsequent lines
-    echo $TAGS >$TEMPFILE.data
-    cat $TEMPFILE.$FROM | egrep -i "$MATCH" >>$TEMPFILE.data
+    echo $TAGS >$TEMPFILE.tags
+    if [ -s $TEMPFILE.$FROM ]; then
+	# Proceed only if we have things we could match
+	cat $TEMPFILE.$FROM | egrep -i "$MATCH" >$TEMPFILE.matches
+	if [ -s $TEMPFILE.matches ]; then
+	    # Proceed only if we did match things
+	    cat $TEMPFILE.tags $TEMPFILE.matches >$TEMPFILE.data
+	    rm $TEMPFILE.tags
 
-    # Have a helper script do the insertions
-    cat $TEMPFILE.data | php \
-	./automated_scripts/convert-insert-youtube-scrape.php $DATABASE
+	    # Have a helper script do the insertions
+	    cat $TEMPFILE.data | php \
+		"$INSTALL_DIR"automated_scripts/convert-insert-youtube-scrape.php \
+		$DATABASE $SUBDIR $EPTAG
 
-    # Clean up, then extract non-matching items ready for the next run
-    rm $TEMPFILE.data
-    cat $TEMPFILE.$FROM | egrep -vi "$MATCH" >$TEMPFILE.$TO
+	    # Clean up, then extract non-matching items ready for the next run
+	    rm $TEMPFILE.data
+	    cat $TEMPFILE.$FROM | egrep -vi "$MATCH" >$TEMPFILE.$TO
+
+	else
+	    # Nothing matched
+	    cp $TEMPFILE.$FROM $TEMPFILE.$TO
+	    touch $TEMPFILE.$TO
+	fi
+	rm $TEMPFILE.matches
+
+    else
+	# Nothing we could have matched
+	touch $TEMPFILE.$TO
+    fi
+    rm $TEMPFILE.$FROM
 }
 
 #

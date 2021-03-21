@@ -48,11 +48,14 @@ foreach($tags_arr as $tag) {
   }
 }
 if (sizeof($anymissing) > 0) {
-  $msg = 'The following tag(s) are missing from the database:';
+  $msg = __FILE__ . ':' . __LINE__ . ': The following tag(s) are missing ' .
+    'from the database:';
   foreach($anymissing as $missing) {
     $msg .= ' "' . $missing . '"';
   }
   $msg .= "\nand will need to be added before script can complete\n";
+  $msg .= "Search term was: $tag\n";
+  $msg .= "Arguments were " . print_r($argv, true) . "\n";
   $result = 1;
   goto completed;
 }
@@ -105,7 +108,7 @@ foreach($tags_arr as $tag) {
     // Tag found.
     $predicate = escapeshellarg(PREDICATE_LINKS);
     shell_exec("php api/link_add.php $projname $existing_tag " .
-	       "$predicate $tag");
+	       "$predicate \"$tag\"");
   }
 }
 

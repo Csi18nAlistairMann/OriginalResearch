@@ -14,7 +14,7 @@ Design
        - or.sh		    (main entry point)
        - /tmp/effort02/	    Variety files used for transferring state
        - pics/		    Pictures for the manual
-       - scrapes/	    Raw & processed data scraped from sites
+       - ~/OR/scrapes/	    Raw & processed data scraped from sites
        - gexf/		    Network maps in XML form of node & edges
        - manual/	    Documentation
 

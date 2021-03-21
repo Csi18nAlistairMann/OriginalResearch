@@ -12,7 +12,7 @@
   2. Full Screen
   3. Page down to bottom so we see 500, not 50
   4. Ctrl-a | Ctrl-C
-  5. Place in source file ./scrapes/hive.one.input.ddmmmyyy.btc
+  5. Place in source file ~/OR/scrapes/hive.one.input.ddmmmyyy.btc
   6. Remove items from start down to but excluding name 1 (Adam Back)
   7. Remove items from "HIVE" down (short copy) or "End of list" down (long
   copy)
