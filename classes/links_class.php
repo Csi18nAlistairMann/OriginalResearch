@@ -4,9 +4,14 @@ require_once('defines.php');
 
 class link
 {
-  private $subject = null;
-  private $predicate = null;
   private $object = null;
+  private $predicate = null;
+  private $subject = null;
+  private $timestamp = null;
+
+  function __construct() {
+    $this->timestamp(date(TIMESTAMP_FORMAT));
+  }
 
   function subject($val = null) {
     if ($val === null)
@@ -28,6 +33,13 @@ class link
     else
       $this->object = $val;
   }
+
+  function timestamp($val = null) {
+    if ($val === null)
+      return $this->timestamp;
+    else
+      $this->timestamp = $val;
+  }
 }
 
 class links
@@ -42,7 +54,8 @@ class links
 
   function load() {
     if (!file_exists($this->db_file)) {
-      $this->db = array();
+      $l = new link;
+      $this->db = array($l);
       $this->save();
     }
     $this->db = unserialize(file_get_contents($this->db_file));
