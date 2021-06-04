@@ -38,7 +38,7 @@ class automated_cribs
   private $db_file;
   public $db;
 
-  function automated_cribs($projname) {
+  function __construct($projname) {
     $projname = mb_substr($projname, 1, mb_strlen($projname) - 2);
     $this->db_file = DATA_DIR . $projname . '/db/automated_cribs.serialised';
   }

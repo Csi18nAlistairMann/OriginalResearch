@@ -13,7 +13,7 @@ require_once('defines.php');
 
 class effort02
 {
-  function effort02() {
+  function __construct() {
     if (!file_exists(TEMP_DIR))
       mkdir(TEMP_DIR);
   }

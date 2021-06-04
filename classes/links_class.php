@@ -47,7 +47,7 @@ class links
   private $db_file;
   public $db;
 
-  function links($projname) {
+  function __construct($projname) {
     $projname = mb_substr($projname, 1, mb_strlen($projname) - 2);
     $this->db_file = DATA_DIR . $projname . '/db/links.serialised';
   }
