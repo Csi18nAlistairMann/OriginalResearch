@@ -107,14 +107,15 @@ iteration "TFTC" "tftc/guides" "Guide" "$TFTCGTAG" 3 4
 iteration "TFTC" "tftc/episodes" "Tales from the" "$TFTCTAG" 4 5
 iteration "TFTC" "tftc/episodes" ">#[0-9]+:" "$TFTCTAG" 5 6
 iteration "TFTC" "tftc/episodes" "Ep[0-9]+" "$TFTCTAG" 6 7
+iteration "TFTC" "tftc/episodes" "TFTC [0-9]+" "$TFTCTAG" 7 8
 # These items do not match the above so have been dealt with manually
-iteration "TFTC" "tftc/other" "3NQ_d3kr6u0" "$TFTCTAG" 7 8
-iteration "TFTC" "tftc/other" "6ZmYx3_-Frc" "$TFTCTAG" 8 9
-iteration "TFTC" "tftc/other" "hISvHhQI_ck" "$TFTCTAG" 9 10
-iteration "TFTC" "tftc/citadel" "aylDowaSdzU" "$CDTAG" 10 11
+iteration "TFTC" "tftc/other" "3NQ_d3kr6u0" "$TFTCTAG" 8 9
+iteration "TFTC" "tftc/other" "6ZmYx3_-Frc" "$TFTCTAG" 9 10
+iteration "TFTC" "tftc/other" "hISvHhQI_ck" "$TFTCTAG" 10 11
+iteration "TFTC" "tftc/citadel" "aylDowaSdzU" "$CDTAG" 11 12
 
 #
 # If the final temporary file is of non-zero size the original scrape has one
 # or more videos that do not match anything above. Let the user know, then
 # clean up.
-cleanup $TEMPFILE 11
+cleanup $TEMPFILE 12
