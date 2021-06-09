@@ -35,7 +35,7 @@ while [ 1 -eq 1 ]; do
     while [ "$ARG" != '/' ] && [ "$ARG" != '.' ] && [ "$ARG" != '>' ] && \
 	[ "$ARG" != 'RV' ] && [ "$ARG" != 'RA' ] && [ "$ARG" != 'RM' ] && \
 	[ "$ARG" != 'S' ] && [ "$ARG" != '[' ] && [ "$ARG" != ']' ] && \
-	[ "$ARG" != '{' ] && [ "$ARG" != '-' ]; do
+	[ "$ARG" != '{' ] && [ "$ARG" != '-' ] && [ "$ARG" != '*' ]; do
 	php show-thing.php "$PROJNAME" $ARG
 	ARG=$(cat $WAT_DO_NEXT)
     done;
@@ -82,6 +82,9 @@ while [ 1 -eq 1 ]; do
 	SUBJECT=$(cat $BREAK_LINK_TO);
 	OBJECT=$(cat $BREAK_LINK_FROM);
 	php connect-as-aka.php "$PROJNAME" $SUBJECT $OBJECT
+
+    elif [ "$ARG" = '*' ]; then
+	php recents-export.php "$PROJNAME" $ONSHOW
 
     elif [ "$ARG" = '-' ]; then
 	php delete-thing.php "$PROJNAME" $ONSHOW

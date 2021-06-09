@@ -21,6 +21,9 @@ define("MENU_SZ_LONG", MENU_SZ_SHORT . ' 999');
 define("TIMESTAMP_FORMAT", 'YmdHis');
 define("STANDARD_USER", '120');
 define("TYPE_TEST_THING", 'test-thing');
+define("MAX_MENU_ITEMS", 100);
+define("KEY_BACK_A_PAGE", '(');
+define("KEY_FORWARD_A_PAGE", ')');
 
 define("PREDICATE_LINKS", 0);
 define("PREDICATE_AKA_OF", 1);

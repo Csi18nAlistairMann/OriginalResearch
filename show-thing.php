@@ -108,30 +108,31 @@ if (sizeof($connections) !== 0) {
   if (mb_strlen($akas_text) > 0) {
     $akas_text = ' aka:[' . mb_substr($akas_text, 0, -2) . '] ';
   }
-  $dialog->choice_add('?', 'Top Level');
+  $dialog->common_choice_add('?', 'Top Level');
 } else {
   // If we don't link to anything? Mock it up for now
-  $dialog->choice_add('1', 'cat');
-  $dialog->choice_add('2', 'dog');
+  $dialog->common_choice_add('1', 'cat');
+  $dialog->common_choice_add('2', 'dog');
 }
 // Add menu items common to all Things
-$dialog->choice_add('/', 'Add thing');
-$dialog->choice_add('{', 'Add AKA');
-$dialog->choice_add('.', 'Edit thing');
-$dialog->choice_add('RV', 'View reviews');
-$dialog->choice_add('RA', 'Add review');
-$dialog->choice_add('RM', 'Mark reviewed');
-$dialog->choice_add('S', 'Search');
-$dialog->choice_add('[', 'Edit nuance');
+$dialog->common_choice_add('/', 'Add thing');
+$dialog->common_choice_add('{', 'Add AKA');
+$dialog->common_choice_add('.', 'Edit thing');
+$dialog->common_choice_add('RV', 'View reviews');
+$dialog->common_choice_add('RA', 'Add review');
+$dialog->common_choice_add('RM', 'Mark reviewed');
+$dialog->common_choice_add('S', 'Search');
+// $dialog->common_choice_add('*', 'Export recents');
+$dialog->common_choice_add('[', 'Edit nuance');
 $last = $things->getThingFromTag($were_looking_at_tag);
 if ($last !== null) {
-  $dialog->choice_add(']', 'Make this an AKA of "' .
+  $dialog->common_choice_add(']', 'Make this an AKA of "' .
 		      $last->getTextAndNuance() . '" (' .
 		      $were_looking_at_tag . ')');
-  $dialog->choice_add('>', 'Break link to (' . $were_looking_at_tag . ') ' .
-		      $were_looking_at_name);
+  $dialog->common_choice_add('>', 'Break link to (' .
+		      $were_looking_at_tag . ') ' . $were_looking_at_name);
 }
-$dialog->choice_add('-', 'Delete this thing');
+$dialog->common_choice_add('-', 'Delete this thing');
 
 // now show the dialog
 $dialog->title = $thing_type . ' #' . $thing_id;

@@ -67,7 +67,7 @@ foreach($things->db as $item) {
 $n = 1;
 $output_choices = '';
 $crib = array();
-$dialog_found->choice_add($n, $search_phrase . ' add as new');
+$dialog_found->common_choice_add($n, $search_phrase . ' add as new');
 $ASNEW = 0;
 $ALREADYPRESENT = 1;
 $LINKTOOLD = 2;
@@ -75,7 +75,7 @@ $crib[] = array($n, $search_phrase, 0, $ASNEW);
 $n++;
 if (sizeof($exact_arr)) {
   foreach($exact_arr as $item) {
-    $dialog_found->choice_add($n, $item->getTextAndNuance() . ' (' .
+    $dialog_found->common_choice_add($n, $item->getTextAndNuance() . ' (' .
 			      $item->tag() . ') already present');
     $crib[] = array($n, $item->text(), $item->tag(), $ALREADYPRESENT);
     $n++;

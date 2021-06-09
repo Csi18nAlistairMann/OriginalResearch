@@ -75,7 +75,7 @@ if ($search_phrase === '') {
     $crib = array();
     $tag = 'S';
     $notfound = '-- No matches found. Search again? --';
-    $dialog_found->choice_add($tag, $notfound);
+    $dialog_found->common_choice_add($tag, $notfound);
 
     $crib[] = array(null, $notfound, $tag, $LINKTOOLD);
 
@@ -86,7 +86,7 @@ if ($search_phrase === '') {
 
     if (sizeof($exact_tag_arr)) {
       foreach($exact_tag_arr as $item) {
-	$dialog_found->choice_add($n, $item->getTextAndNuance() . ' (' .
+	$dialog_found->common_choice_add($n, $item->getTextAndNuance() . ' (' .
 				  $item->tag() . ') tag match');
 	$crib[] = array($n, $item->text(), $item->tag(), $ALREADYPRESENT);
 	$n++;
@@ -95,7 +95,7 @@ if ($search_phrase === '') {
 
     if (sizeof($exact_arr)) {
       foreach($exact_arr as $item) {
-	$dialog_found->choice_add($n, $item->getTextAndNuance() . ' (' .
+	$dialog_found->common_choice_add($n, $item->getTextAndNuance() . ' (' .
 				  $item->tag() . ') exact match');
 	$crib[] = array($n, $item->text(), $item->tag(), $ALREADYPRESENT);
 	$n++;
