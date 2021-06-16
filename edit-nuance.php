@@ -55,6 +55,7 @@ $thing_name = $dialog->show();
 if ($thing_name !== '') {
   // store the edited name
   $things->db[$record_idx]->nuance($thing_name);
+  $things->db[$record_idx]->setCurrentTimestamp();
   $things->save();
 }
 $effort->whatToShowNext($thing_id);

@@ -12,6 +12,10 @@ class thing
   private $type = null;
   private $user = null;
 
+  function __construct() {
+    $this->setCurrentTimestamp();
+  }
+
   function nuance($val = null) {
     if ($val === null)
       return $this->nuance;
@@ -61,6 +65,10 @@ class thing
       return $this->user;
     else
       $this->user = $val;
+  }
+
+  function setCurrentTimestamp() {
+    $this->timestamp = date(TIMESTAMP_FORMAT);
   }
 
   /*
