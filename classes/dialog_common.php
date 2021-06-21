@@ -3,18 +3,21 @@
 /*
   dialog
 
-  Effort02's UI is provided through dialog(1) calls - this class
-  gives effect to them.
+  Effort02's UI is provided through dialog(1) calls - this class gives effect
+  to them.
 
-  Dialog(1) provides a nice balance between keyboard-only control
-  with whole screen menus
- */
+  Dialog(1) provides a nice balance between keyboard-only control with whole
+  screen menus
+*/
+
+require_once("mixstring_class.php");
+require_once("dialog_cmd_class.php");
 
 class dialog
 {
-  private $common_choices = ''; /* A common choice is offered on every menu */
-  private $common_choices_size; /* page */
-  private $choices_arr; /* Things appear in here */
+  public $cmd;
+  private $common_choices = ''; /* A common choice is offered on every page */
+  private $common_choices_size;
   public $crwrap = '';
   public $debug = '';
   public $defaultno = '';
@@ -29,20 +32,15 @@ class dialog
   public $yesno = '';
 
   function __construct() {
+    $this->cmd = new dialog_cmd;
     $this->common_choices_size = 0;
-    $this->choices_arr = array();
   }
 
-  function escape($val) {
-    $escaped = str_replace("'", "'\''", $val);
-    return $escaped;
-  }
-
-  // With the object populated, show constructs the command dialog(1) needs to
-  // give effect to what's required. "menu" may be so long that internal errors
-  // occur, so paging is made available here with common items shown on each
-  // page.
-  function show(){
+  // With the object populated, show() constructs the command dialog(1) needs
+  // to give effect to what's required. "menu" may be so long that internal
+  // errors occur, so paging is made available here with common items shown on
+  // each page.
+  function show() {
     $menu_start = 0;
     $return_status = false;
 
@@ -56,38 +54,40 @@ class dialog
 	$cmd .= "--defaultno ";
 
       if ($this->title !== '')
-	$cmd .= "--title ' " . $this->escape($this->title) . " ' ";
+	$cmd .= "--title ' " . cli::escape($this->title) . " ' ";
 
       // Different types of dialog
       if ($this->input !== '') {
-	$cmd .= "--inputbox '" . $this->escape($this->input) . "' " .
-	  $this->escape($this->sizes) . " ";
+	$cmd .= "--inputbox '" . cli::escape($this->input) . "' " .
+	  cli::escape($this->sizes) . " ";
 	if ($this->input_init !== '')
-	  $cmd .= "'" . $this->escape($this->input_init) . "' ";
+	  $cmd .= "'" . cli::escape($this->input_init) . "' ";
 
       } elseif ($this->menu !== '') {
-	if ($this->show_cancel === false) {
+	if ($this->show_cancel === false)
 	  $cmd .= '--nocancel ';
-	}
-	$cmd .= "--menu '" . $this->escape($this->menu) . "' " .
-	  $this->escape($this->sizes) . " " .
-	  $this->get_choices($menu_start,
-			     MAX_MENU_ITEMS - $this->get_number_common_choices()) .
-	  " " . $this->common_choices;
+	$cmd .= "--menu '" . cli::escape($this->menu) . "' " .
+	  cli::escape($this->sizes) . " ";
+	$cmd_end = " " . $this->common_choices;
+	$overhead = strlen($cmd) + strlen($cmd_end);
+	$cmd .= $this->get_choices($overhead, $menu_start,
+				   MAX_MENU_ITEMS -
+				   $this->get_number_common_choices()) .
+				   $cmd_end;
 
       } elseif ($this->edit !== '') {
 	// no quotes for edit as it's a filepath (?)
-	$cmd .= "--editbox " . $this->escape($this->edit) . " " .
-	  $this->escape($this->sizes);
+	$cmd .= "--editbox " . cli::escape($this->edit) . " " .
+	  cli::escape($this->sizes);
 
       } elseif ($this->msg !== '') {
-	$cmd .= "--msgbox '" . $this->escape($this->msg) . "' " .
-	  $this->escape($this->sizes);
+	$cmd .= "--msgbox '" . cli::escape($this->msg) . "' " .
+	  cli::escape($this->sizes);
 
       } elseif ($this->yesno !== '') {
 	$return_status = true;
-	$cmd .= "--yesno '" . $this->escape($this->yesno) . "' " .
-	  $this->escape($this->sizes);
+	$cmd .= "--yesno '" . cli::escape($this->yesno) . "' " .
+	  cli::escape($this->sizes);
       }
 
       if ($this->debug === true) {
@@ -97,6 +97,8 @@ class dialog
       }
 
       $rv = $this->show_dialog($cmd, $return_status);
+
+      // Handle paging
       if ($rv === KEY_BACK_A_PAGE)
 	$menu_start -= MAX_MENU_ITEMS - $this->get_number_common_choices();
       elseif ($rv === KEY_FORWARD_A_PAGE)
@@ -104,50 +106,65 @@ class dialog
       else
 	break;
     }
-
     return $rv;
   }
 
-  // get_choices returns all or a subset of the menu items available, including
-  // the paging tag if required
-  function get_choices($start, $len = -1) {
-    if ($len === -1)
-      $len = sizeof($this->choices_arr);
+  // get_choices() returns all or a subset of the menu items available,
+  // including the paging tag if required
+  function get_choices($overhead, $start, $len = -1) {
+    $actsize = $this->cmd->getNumItems();
+    if ($len === -1 || $start + $len > $actsize)
+      $len = $actsize - $start;
+    if ($len > MAX_MENU_ITEMS)
+      $len = MAX_MENU_ITEMS;
 
     // Back a page *only* if we're not looking at first menu item
-    if ($start !== 0)
-      $rv = "'" . $this->escape('(') . "' '" . $this->escape('Back a page') .
+    if ($start !== 0) {
+      $rv = "'" . cli::escape('(') . "' '" . cli::escape('Back a page') .
 	"' ";
-    else
-      $rv = '';
+      $overhead += strlen($rv);
 
-    // Remaining menu items
-    for($a = $start; $a < $start + $len; $a++)
-      $rv .= $this->choices_arr[$a] . " ";
+    } else {
+      $rv = '';
+    }
 
     // If we have one menu item left unshown, show it, otherwise if we have
-    // more than one left unshown, add Forward a page
-    if ($start + $len === sizeof($this->choices_arr) - 1)
-      $rv .=  $this->choices_arr[$start + $len] . " ";
+    // more than one left unshown, add Forward a page. Calculate it now so we
+    // can determine if we need to add fewer menu items
+    $end_rv = '';
+    $numitems = $this->cmd->getNumItems();
+    if ($start + $len === $numitems - 1)
+      $end_rv =  $this->cmd->getItemN($start + $len) . " ";
 
-    elseif ($start + $len < sizeof($this->choices_arr))
-      $rv .= "'" . $this->escape(')') . "' '" . $this->escape('Forward a page') .
-      "' ";
+    elseif ($start + $len < $numitems)
+      $end_rv = "'" . cli::escape(')') . "' '" .
+      cli::escape('Forward a page') . "' ";
+    $overhead += strlen($end_rv);
 
-    return $rv;
+    // And then we iterate over it shortening longest entries down to the next
+    // longest until we can fit the lot into cmd without breaking the upper
+    // bound on length
+    $subset = $this->cmd->getSubset($start, $len);
+    $numsubsetitems = $subset->getNumItems();
+    $overhead += $numsubsetitems; /* Account for whitespace added below */
+    $subset->shorten($overhead, MAX_CMD_LEN);
+
+    // Build remaining menu items
+    for($a = 0; $a < $numsubsetitems; $a++) {
+      $ms = $subset->getItemN($a);
+      $rv .= $ms->getEscaped() . " ";
+    }
+
+    // And complete by adding any items after the menu
+    return $rv . $end_rv;
   }
 
-  function choice_add($tag, $text) {
-    $this->choices_arr[] = "'" . $this->escape($tag) . "' '" .
-      $this->escape($text) . "'";
-  }
-
-  // common_choice_add uses a simple string as common menu items cannot be
+  // common_choice_add doesn't use mixstrings as common menu items cannot be
   // paged
   function common_choice_add($tag, $text) {
     $this->common_choices_size++;
-    $this->common_choices .= "'" . $this->escape($tag) . "' '" .
-      $this->escape($text) . "' ";
+    $this->common_choices .= "'" . cli::escape($tag) . "' '" .
+      cli::escape($text) . "' ";
   }
 
   function get_number_common_choices() {
@@ -162,6 +179,7 @@ class dialog
     $this->debug = $val;
   }
 
+  // sizes describes how size in characters of some dialogs
   function sizes_change($text) {
     $this->sizes = $text;
   }

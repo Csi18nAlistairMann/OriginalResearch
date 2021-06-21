@@ -87,7 +87,7 @@ if ($search_phrase === '') {
     if (sizeof($exact_tag_arr)) {
       foreach($exact_tag_arr as $item) {
 	$dialog_found->common_choice_add($n, $item->getTextAndNuance() . ' (' .
-				  $item->tag() . ') tag match');
+					 $item->tag() . ') tag match');
 	$crib[] = array($n, $item->text(), $item->tag(), $ALREADYPRESENT);
 	$n++;
       }
@@ -96,7 +96,7 @@ if ($search_phrase === '') {
     if (sizeof($exact_arr)) {
       foreach($exact_arr as $item) {
 	$dialog_found->common_choice_add($n, $item->getTextAndNuance() . ' (' .
-				  $item->tag() . ') exact match');
+					 $item->tag() . ') exact match');
 	$crib[] = array($n, $item->text(), $item->tag(), $ALREADYPRESENT);
 	$n++;
       }
@@ -104,8 +104,9 @@ if ($search_phrase === '') {
 
     if (sizeof($found_arr)) {
       foreach($found_arr as $item) {
-	$dialog_found->choice_add($n, $item->getTextAndNuance() . ' (' .
-				  $item->tag() . ') close match');
+	$dialog_found->cmd->addSimplePair($n, $item->getTextAndNuance() .
+					  ' (' . $item->tag() .
+					  ') close match');
 	$crib[] = array($n, $item->text(), $item->tag(), $LINKTOOLD);
 	$n++;
       }

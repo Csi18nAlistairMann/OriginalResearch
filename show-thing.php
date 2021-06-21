@@ -4,7 +4,7 @@
   show-thing
 
   Call up a Thing and display it, along with such menus as required
- */
+*/
 
 mb_internal_encoding("UTF-8");
 
@@ -35,7 +35,7 @@ $were_looking_at_tag = $effort->wereLookingAt();
 $things = new things($projname);
 $things->load();
 if ($record_to_show === 0) {
-    $record_idx = 0;
+  $record_idx = 0;
 
 } else {
   $n = 0;
@@ -97,8 +97,9 @@ if (sizeof($connections) !== 0) {
 	      // Shouldn't get here
 	      $pred_text = '!!';
 	    }
-	    $dialog->choice_add($connection, $pred_text .
-				$item->getTextAndNuance());
+	    $dialog->cmd->addSimplePair($connection,
+					$pred_text .
+					$item->getTextAndNuance());
 	  }
 	}
       }
@@ -109,6 +110,7 @@ if (sizeof($connections) !== 0) {
     $akas_text = ' aka:[' . mb_substr($akas_text, 0, -2) . '] ';
   }
   $dialog->common_choice_add('?', 'Top Level');
+
 } else {
   // If we don't link to anything? Mock it up for now
   $dialog->common_choice_add('1', 'cat');
@@ -127,10 +129,11 @@ $dialog->common_choice_add('[', 'Edit nuance');
 $last = $things->getThingFromTag($were_looking_at_tag);
 if ($last !== null) {
   $dialog->common_choice_add(']', 'Make this an AKA of "' .
-		      $last->getTextAndNuance() . '" (' .
-		      $were_looking_at_tag . ')');
+		             $last->getTextAndNuance() . '" (' .
+			     $were_looking_at_tag . ')');
   $dialog->common_choice_add('>', 'Break link to (' .
-		      $were_looking_at_tag . ') ' . $were_looking_at_name);
+			     $were_looking_at_tag . ') ' .
+			     $were_looking_at_name);
 }
 $dialog->common_choice_add('-', 'Delete this thing');
 

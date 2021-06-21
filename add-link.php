@@ -76,7 +76,7 @@ $n++;
 if (sizeof($exact_arr)) {
   foreach($exact_arr as $item) {
     $dialog_found->common_choice_add($n, $item->getTextAndNuance() . ' (' .
-			      $item->tag() . ') already present');
+				     $item->tag() . ') already present');
     $crib[] = array($n, $item->text(), $item->tag(), $ALREADYPRESENT);
     $n++;
   }
@@ -84,8 +84,8 @@ if (sizeof($exact_arr)) {
 
 if (sizeof($found_arr)) {
   foreach($found_arr as $item) {
-    $dialog_found->choice_add($n, $item->getTextAndNuance() . ' (' .
-			      $item->tag() . ') link to old');
+    $dialog_found->cmd->addSimplePair($n, $item->getTextAndNuance() . ' (' .
+				      $item->tag() . ') link to old');
     $crib[] = array($n, $item->text(), $item->tag(), $LINKTOOLD);
     $n++;
   }
