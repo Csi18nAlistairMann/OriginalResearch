@@ -125,7 +125,7 @@ class things
       // that can be used. Make it, and save it
       $t = new thing;
       $t->nuance('');
-      $t->tag('?');
+      $t->tag(KEY_TOP_LEVEL);
       $t->text('Top Level');
       $t->timestamp(date(TIMESTAMP_FORMAT));
       $t->type(TYPE_TEST_THING);

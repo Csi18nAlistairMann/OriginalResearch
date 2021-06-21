@@ -84,7 +84,7 @@ if (sizeof($connections) !== 0) {
     foreach($connections as $connection) {
       // if that thing appears in the connection list
       if ($item->tag() === $connection) {
-	if ($item->tag() !== '?') {
+	if ($item->tag() !== KEY_TOP_LEVEL) {
 	  // then include it in the menu
 	  $l = $links->getLinkFromTags($thing_id, $connection);
 	  if ($l !== null) {
@@ -109,7 +109,7 @@ if (sizeof($connections) !== 0) {
   if (mb_strlen($akas_text) > 0) {
     $akas_text = ' aka:[' . mb_substr($akas_text, 0, -2) . '] ';
   }
-  $dialog->common_choice_add('?', 'Top Level');
+  $dialog->common_choice_add(KEY_TOP_LEVEL, 'Top Level');
 
 } else {
   // If we don't link to anything? Mock it up for now

@@ -58,6 +58,6 @@ if ($thing_name !== 1) {
   array_splice($things->db, $record_idx, 1);
   $things->save();
 }
-$effort->whatToShowNext('?');
+$effort->whatToShowNext(KEY_TOP_LEVEL);
 
 ?>

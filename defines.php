@@ -24,6 +24,7 @@ define("TYPE_TEST_THING", 'test-thing');
 define("MAX_MENU_ITEMS", 1000);
 define("KEY_BACK_A_PAGE", '(');
 define("KEY_FORWARD_A_PAGE", ')');
+define("KEY_TOP_LEVEL", "?");
 define("MAX_CMD_LEN", 131067);
 
 define("PREDICATE_LINKS", 0);
