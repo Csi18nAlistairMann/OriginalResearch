@@ -29,6 +29,8 @@ if ($argc !== 5) {
 
   $found = false;
   foreach($links->db as $link) {
+    if ($link->deleted() === true)
+      continue;
     if (($link->subject() === $subject && $link->object() === $object)
 	||
 	($link->object() === $subject && $link->subject() === $object)) {

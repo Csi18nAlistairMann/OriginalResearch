@@ -52,6 +52,8 @@ if ($search_phrase === '') {
   $exact_tag_arr = array();
   $lsearch_phrase = mb_strtolower($search_phrase);
   foreach($things->db as $item) {
+    if ($item->deleted() === true)
+      continue;
     $exact_arr2 = $item->textIs($lsearch_phrase, $things, $links);
     $found_arr2 = $item->textStrPos($lsearch_phrase);
 

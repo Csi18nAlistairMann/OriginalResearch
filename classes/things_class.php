@@ -5,6 +5,7 @@ require_once('classes/links_class.php');
 
 class thing
 {
+  private $deleted = null;
   private $nuance = null;
   private $tag = null;
   private $text = null;
@@ -13,7 +14,17 @@ class thing
   private $user = null;
 
   function __construct() {
+    $this->deleted = false;
     $this->setCurrentTimestamp();
+  }
+
+  function delete() {
+    $this->deleted = true;
+    $this->setCurrentTimestamp();
+  }
+
+  function deleted() {
+    return $this->deleted;
   }
 
   function nuance($val = null) {
@@ -124,10 +135,11 @@ class things
       // If the database doesn't exist we nevertheless want to have a top level
       // that can be used. Make it, and save it
       $t = new thing;
+      $t->deleted(false);
       $t->nuance('');
       $t->tag(KEY_TOP_LEVEL);
       $t->text('Top Level');
-      $t->timestamp(date(TIMESTAMP_FORMAT));
+      $t->setCurrentTimestamp();
       $t->type(TYPE_TEST_THING);
       $t->user(STANDARD_USER);
       $this->db = array($t);

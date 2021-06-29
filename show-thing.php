@@ -41,11 +41,11 @@ if ($record_to_show === 0) {
   $n = 0;
   $record_idx = null;
   foreach($things->db as $item) {
-    if (strval($item->tag()) === "$were_looking_at_tag") {
-      $were_looking_at_name = $item->text();
-    }
-    if (strval($item->tag()) === "$record_to_show") {
-      $record_idx = $n;
+    if ($item->deleted() !== true) {
+      if (strval($item->tag()) === "$were_looking_at_tag")
+	$were_looking_at_name = $item->text();
+      if (strval($item->tag()) === "$record_to_show")
+	$record_idx = $n;
     }
     $n++;
   }
@@ -81,6 +81,8 @@ $akas_text = '';
 if (sizeof($connections) !== 0) {
   // for each thing we have
   foreach($things->db as $item) {
+    if ($item->deleted() === true)
+      continue;
     foreach($connections as $connection) {
       // if that thing appears in the connection list
       if ($item->tag() === $connection) {
@@ -129,7 +131,7 @@ $dialog->common_choice_add('[', 'Edit nuance');
 $last = $things->getThingFromTag($were_looking_at_tag);
 if ($last !== null) {
   $dialog->common_choice_add(']', 'Make this an AKA of "' .
-		             $last->getTextAndNuance() . '" (' .
+			     $last->getTextAndNuance() . '" (' .
 			     $were_looking_at_tag . ')');
   $dialog->common_choice_add('>', 'Break link to (' .
 			     $were_looking_at_tag . ') ' .

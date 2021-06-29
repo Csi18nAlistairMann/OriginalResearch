@@ -50,7 +50,7 @@ if ($rv === 0) {
     $split_contents = explode("\n", $contents);
     foreach($split_contents as $a) {
       $a = trim($a);
-      $a = trim($a, '\'"');
+      $a = trim($a, '\'"'); //" damn emacs colouring
       if ($a !== '') {
 	$tag_arr[] = $a;
       }
@@ -74,14 +74,15 @@ if ($rv === 0) {
   $links->load();
   $tag_arr2 = array();
   foreach($links->db as $link) {
+    if ($link->deleted() === true)
+      continue;
     $a = $link->subject();
     $b = $link->object();
     $person = null;
-    if ($a === $people_tag) {
+    if ($a === $people_tag)
       $person = $b;
-    } elseif ($b === $people_tag) {
+    elseif ($b === $people_tag)
       $person = $a;
-    }
     if ($person !== null) {
       foreach($tag_arr as $tag) {
 	if ($tag === $person)
@@ -99,6 +100,8 @@ if ($rv === 0) {
 
   $devs_arr = array();
   foreach($links->db as $link) {
+    if ($link->deleted() === true)
+      continue;
     $a = $link->subject();
     $b = $link->object();
     $person = null;
@@ -129,6 +132,8 @@ if ($rv === 0) {
 
   $repos_arr = array();
   foreach($links->db as $link) {
+    if ($link->deleted() === true)
+      continue;
     $a = $link->subject();
     $b = $link->object();
     $repo = null;
@@ -161,6 +166,8 @@ if ($rv === 0) {
   foreach($devs_arr as $dev) {
     $found = false;
     foreach($links->db as $link) {
+      if ($link->deleted() === true)
+	continue;
       foreach($l2repos_arr as $url) {
 	if (($link->subject() === $dev && $link->object() === $url)
 	    ||

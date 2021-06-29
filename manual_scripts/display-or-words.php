@@ -42,6 +42,8 @@ $things = new things($projname);
 $things->load();
 $p = array();
 foreach($things->db as $thing) {
+  if ($thing->deleted() === true)
+    continue;
   if (mb_substr($thing->text(), 0, mb_strlen('https://')) === 'https://'
       ||
       mb_substr($thing->text(), 0, mb_strlen('http://')) === 'http://') {

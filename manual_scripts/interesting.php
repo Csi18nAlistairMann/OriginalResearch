@@ -130,6 +130,8 @@ foreach($display_arr1 as $candidate) {
 
   } else {
     foreach($links->db as $link) {
+      if ($link->deleted() === true)
+	continue;
       if ($link->predicate() === PREDICATE_AKA_OF &&
 	  $link->subject() === $tag) {
 	$objtag = $link->object();

@@ -53,6 +53,8 @@ $found_arr = array();
 $exact_arr = array();
 $lsearch_phrase = mb_strtolower($search_phrase);
 foreach($things->db as $item) {
+  if ($item->deleted() === true)
+    continue;
   // search on what we want to link to this tag
   $litem_name = mb_strtolower($item->text());
   if ($litem_name === $lsearch_phrase) {
@@ -155,6 +157,8 @@ if (sizeof($chosen) !== 1) {
   $links->load();
   $found = false;
   foreach($links->db as $item) {
+    if ($item->deleted() === true)
+      continue;
     if (($item->subject() === $thing_to_add_to &&
 	 $item->object() === $thing_tag)
 	||

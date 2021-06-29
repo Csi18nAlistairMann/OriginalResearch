@@ -37,6 +37,8 @@ $links->load();
 $found = false;
 $predicate = escapeshellarg(PREDICATE_AKA_OF);
 foreach($links->db as $item) {
+  if ($item->deleted() === true)
+    continue;
   if (($item->subject() === $object && $item->object() === $subject)
       ||
       ($item->object() === $object && $item->subject() === $subject)) {

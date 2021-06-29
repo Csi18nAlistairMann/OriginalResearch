@@ -31,8 +31,9 @@ $things = new things($projname);
 $things->load();
 $n = 0;
 foreach($things->db as $item) {
-  if (strval($item->tag()) === "$record_to_show") {
-    $record_idx = $n;
+  if ($item->deleted() !== true) {
+    if (strval($item->tag()) === "$record_to_show")
+      $record_idx = $n;
   }
   $n++;
 }

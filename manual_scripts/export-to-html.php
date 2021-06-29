@@ -38,9 +38,10 @@ function getAHref($things, $ject) {
   $ject2 = str_replace('?', '%3F',  $ject);
   $rv = '<a href="./' . $ject2 . '.html">';
   foreach($things->db as $thing) {
-    if ($thing->tag() === $ject) {
+    if ($thing->deleted() === true)
+      continue;
+    if ($thing->tag() === $ject)
       $rv .= "($ject) " . $thing->getTextAndNuance();
-    }
   }
   $rv .= '</a>';
   return $rv;
@@ -48,12 +49,16 @@ function getAHref($things, $ject) {
 
 // One html page per Thing
 foreach($things->db as $thing) {
+  if ($thing->deleted() === true)
+    continue;
   $html = '<html><head></head>';
   $html .= '<body>';
   $html .= '<div>' . $thing->getTextAndNuance() . '</div>';
   $html .= "\n";
   $html .= getAHRef($things, '?') . "<br>\n";
   foreach($links->db as $link) {
+    if ($link->deleted() === true)
+      continue;
     $aka = '';
     if ($link->predicate() === PREDICATE_AKA_OF)
       $aka .= 'AKA ';

@@ -4,13 +4,24 @@ require_once('defines.php');
 
 class link
 {
+  private $deleted = null;
   private $object = null;
   private $predicate = null;
   private $subject = null;
   private $timestamp = null;
 
   function __construct() {
-    $this->timestamp(date(TIMESTAMP_FORMAT));
+    $this->deleted = false;
+    $this->setCurrentTimestamp();
+  }
+
+  function delete() {
+    $this->deleted = true;
+    $this->setCurrentTimestamp();
+  }
+
+  function deleted() {
+    return $this->deleted;
   }
 
   function subject($val = null) {
@@ -39,6 +50,10 @@ class link
       return $this->timestamp;
     else
       $this->timestamp = $val;
+  }
+
+  function setCurrentTimestamp() {
+    $this->timestamp = date(TIMESTAMP_FORMAT);
   }
 }
 
@@ -112,6 +127,12 @@ class links
       $rv = 0;
     }
     return $rv;
+  }
+
+  function deleteIfIncludesTag($tag) {
+    foreach($this->db as $item)
+      if ($item->subject() === $tag || $item->object() === $tag)
+	$item->delete();
   }
 }
 

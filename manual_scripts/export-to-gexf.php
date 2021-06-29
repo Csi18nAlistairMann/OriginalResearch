@@ -57,6 +57,16 @@ for($l = 0; $l < sizeof($links->db); $l++) {
   }
 }
 
+// Remove deleted Links
+debug('1b', 'Remove deleted links');
+for($l = 0; $l < sizeof($links->db); $l++) {
+  if ($links->db[$l]->deleted() === true) {
+    debug('1b', $links->db[$l]);
+    array_splice($links->db, $l, 1);
+    $l--;
+  }
+}
+
 // Roll up AKAs: make whatever points at an AKA instead point at the object
 // of that AKA. So: apple -> Bob --aka--> Robert to apple -> Robert
 debug('2', 'Roll up AKAs');
@@ -102,6 +112,17 @@ for($t = 0; $t < sizeof($things->db); $t++) {
   }
   if ($num_links === $min_links) {
     debug('3', 'Discard ' . print_r($things->db[$t], true));
+    array_splice($things->db, $t, 1);
+    $t--;
+  }
+}
+
+// Remove deleted Things
+debug('4', 'Remove deleted Things');
+$min_links = 0;
+for($t = 0; $t < sizeof($things->db); $t++) {
+  if ($things->db[$t]->deleted() === true) {
+    debug('4', 'Discard ' . print_r($things->db[$t], true));
     array_splice($things->db, $t, 1);
     $t--;
   }
@@ -189,15 +210,12 @@ for($l = 0; $l < sizeof($links->db); $l++) {
   $foundSF = false;
   $foundOF = false;
   foreach($things->db as $thing) {
-    if ($thing->tag() === $subject) {
+    if ($thing->tag() === $subject)
       $foundSF = true;
-    }
-    if ($thing->tag() === $object) {
+    if ($thing->tag() === $object)
       $foundOF = true;
-    }
-    if ($foundSF === true && $foundOF === true) {
+    if ($foundSF === true && $foundOF === true)
       break;
-    }
   }
   if ($foundSF === false || $foundOF === false) {
     debug('4', 'Discard link ' . print_r($links->db[$l], true));
